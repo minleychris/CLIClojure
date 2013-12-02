@@ -54,6 +54,13 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(val.__str__(), "(2 3)")
         self.assertTrue(is_list(val))
 
+class TestDataStructures(unittest.TestCase):
+
+    def test_int(self):
+        val = POSIXlisp.parse_eval("1", POSIXlisp.create_base_env())
+        self.assertEqual(val, 1)
+
+
 
 if __name__ == '__main__':
     unittest.main()
