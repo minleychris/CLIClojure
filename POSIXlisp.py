@@ -58,14 +58,11 @@ class Environment:
 
 
 
-def COND(args, env):
-    if args.head is None:
-        return None;
-
-    if eval(args.head):
+def IF(args, env):
+    if eval(args.head, env):
         return eval(args.rest.head, env)
-
-    return COND(args.rest.rest)
+    else:
+        return eval(args.rest.rest.head, env)
 
 def QUOTE(args, env):
     return args.head
@@ -116,7 +113,7 @@ def EQUALS(*args):
 
 
 def is_special(func):
-    return func in [COND, QUOTE, DEF, FN]
+    return func in [IF, QUOTE, DEF, FN]
 
 
 
@@ -198,7 +195,7 @@ def tree_to_list(tree):
 
 def main(argv=None):
     env = Environment()
-    env.env = {"cond": COND,
+    env.env = {"if": IF,
                "quote": QUOTE,
                "def": DEF,
                "fn": FN,
