@@ -9,7 +9,7 @@ from parsimonious.grammar import Grammar
 
 
 class List:
-    def __init__(self, head = None, rest = None):
+    def __init__(self, head=None, rest=None):
         self.head = head
         self.rest = rest
 
@@ -18,7 +18,7 @@ class List:
             def __init__(self, lst):
                 self.lst = lst
             def next(self):
-                if self.lst == None:
+                if self.lst is None:
                     raise StopIteration
                 head = self.lst.head
                 self.lst = self.lst.rest
@@ -26,16 +26,16 @@ class List:
 
         return ListIterator(self)
 
-    def innerStr(self):
-        if self.rest == None:
+    def _inner_str(self):
+        if self.rest is None:
             return self.head.__str__()
-        return self.head.__str__() + " " + self.rest.innerStr()
+        return self.head.__str__() + " " + self.rest._inner_str()
 
     def __str__(self):
-        return "(" + self.innerStr() + ")"
+        return "(" + self._inner_str() + ")"
 
 class Environment:
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         self.parent = parent
         self.env = {}
 
@@ -52,14 +52,14 @@ class Environment:
         return None
 
     def __str__(self):
-        if self.parent == None:
+        if self.parent is None:
             return self.env.__str__() + " => None"
         return self.env.__str__() + " => " + self.parent.__str__()
 
 
 
 def COND(args, env):
-    if args.head == None:
+    if args.head is None:
         return None;
 
     if eval(args.head):
@@ -116,7 +116,7 @@ def EQUALS(*args):
 
 
 def is_special(func):
-    return func == COND or func == QUOTE or func == DEF or func == FN
+    return func in [COND, QUOTE, DEF, FN]
 
 
 
@@ -127,7 +127,7 @@ def eval_s_exp(s_exp, env):
     if is_special(func):
         return func(rest, env)
     else:
-        if rest == None:
+        if rest is None:
             return func()
         evaled = map(lambda r: eval(r, env), rest)
         return func(*evaled)
