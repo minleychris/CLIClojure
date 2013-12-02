@@ -193,7 +193,12 @@ def tree_to_list(tree):
         return lst;
 
 
-def main(argv=None):
+def parse_eval(input, env):
+    reduced_tree = reduce_exp_tree(grammar.parse(input))
+    program_list = tree_to_list(reduced_tree)
+    return eval(program_list, env)
+
+def create_base_env():
     env = Environment()
     env.env = {"if": IF,
                "quote": QUOTE,
@@ -204,12 +209,14 @@ def main(argv=None):
                "cons": CONS,
                "first": FIRST,
                "rest": REST}
+    return env
+
+def main(argv=None):
+    env = create_base_env()
 
     while True:
         line = raw_input("=> ")
-        reduced_tree = reduce_exp_tree(grammar.parse(line))
-        program_list = tree_to_list(reduced_tree)
-        print(eval(program_list, env))
+        print(parse_eval(line, env))
 
 if __name__ == "__main__":
     sys.exit(main())
