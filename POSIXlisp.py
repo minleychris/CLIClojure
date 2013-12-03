@@ -204,6 +204,8 @@ def eval_s_exp(s_exp, env):
 def eval(exp, env):
     if isinstance(exp, int):
         return exp
+    if isinstance(exp, str):
+        return exp
     if isinstance(exp, Symbol):
         return env.resolve(exp)
     if isinstance(exp, List):
@@ -217,11 +219,12 @@ def eval(exp, env):
 
 grammar = Grammar(
     """
-    exp = number / symbol / s_exp / vector
+    exp = number / symbol / s_exp / vector / string
     number = ~"[0-9]+"
     symbol = ~"[+=a-zA-Z][+=a-zA-Z0-9]*"
     s_exp  = "(" (exp space)* exp ")"
-    vector  = "[" (exp space)* exp "]"
+    vector = "[" (exp space)* exp "]"
+    string = ~"\\".*\\""
     space = " "
     """)
 
@@ -260,6 +263,8 @@ def tree_to_vector(tree):
             lst = vec.cons(int(node["text"]))
         elif node["type"] == "symbol":
             lst = vec.cons(Symbol(node["text"]))
+        elif node["type"] == "string":
+            lst = vec.cons(node["text"])
 
     return vec
 
@@ -279,6 +284,8 @@ def tree_to_list(tree):
             lst = List(int(node["text"]), lst)
         elif node["type"] == "symbol":
             lst = List(Symbol(node["text"]), lst)
+        elif node["type"] == "string":
+            lst = List(node["text"], lst)
 
     if tree["type"] == "exp":
         return lst.first()
