@@ -78,6 +78,34 @@ class Vector(ISeq):
         self.data.append(n)
         return self
 
+class Symbol(object):
+    def __init__(self, val):
+        self._val = val
+
+    def __str__(self):
+        return self._val
+
+    def __lt__(self, other):
+        return self._val.__lt__(other._val)
+
+    def __le__(self, other):
+        return self._val.__le__(other._val)
+
+    def __eq__(self, other):
+        return self._val.__eq__(other._val)
+
+    def __ne__(self, other):
+        return self._val.__ne__(other._val)
+
+    def __gt__(self, other):
+        return self._val.__gt__(other._val)
+
+    def __ge__(self, other):
+        return self._val.__ge__(other._val)
+
+    def __hash__(self):
+        return self._val.__hash__()
+
 class Environment:
     def __init__(self, parent=None):
         self.parent = parent
@@ -176,7 +204,7 @@ def eval_s_exp(s_exp, env):
 def eval(exp, env):
     if isinstance(exp, int):
         return exp
-    if isinstance(exp, str):
+    if isinstance(exp, Symbol):
         return env.resolve(exp)
     if isinstance(exp, List):
         return eval_s_exp(exp, env)
@@ -231,7 +259,7 @@ def tree_to_vector(tree):
         elif node["type"] == "number":
             lst = vec.cons(int(node["text"]))
         elif node["type"] == "symbol":
-            lst = vec.cons(node["text"])
+            lst = vec.cons(Symbol(node["text"]))
 
     return vec
 
@@ -250,7 +278,7 @@ def tree_to_list(tree):
         elif node["type"] == "number":
             lst = List(int(node["text"]), lst)
         elif node["type"] == "symbol":
-            lst = List(node["text"], lst)
+            lst = List(Symbol(node["text"]), lst)
 
     if tree["type"] == "exp":
         return lst.first()
@@ -265,15 +293,15 @@ def parse_eval(input, env):
 
 def create_base_env():
     env = Environment()
-    env.env = {"if": IF,
-               "quote": QUOTE,
-               "def": DEF,
-               "fn": FN,
-               "+": PLUS,
-               "=": EQUALS,
-               "cons": CONS,
-               "first": FIRST,
-               "rest": REST}
+    env.env = {Symbol("if"): IF,
+               Symbol("quote"): QUOTE,
+               Symbol("def"): DEF,
+               Symbol("fn"): FN,
+               Symbol("+"): PLUS,
+               Symbol("="): EQUALS,
+               Symbol("cons"): CONS,
+               Symbol("first"): FIRST,
+               Symbol("rest"): REST}
     return env
 
 def main(argv=None):

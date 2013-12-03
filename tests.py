@@ -27,7 +27,7 @@ class TestSpecialForms(unittest.TestCase):
     def test_def(self):
         env = POSIXlisp.create_base_env()
         val = POSIXlisp.parse_eval("(def a 44)", env)
-        self.assertEqual(val, "a")
+        self.assertEqual(val, POSIXlisp.Symbol("a"))
         val = POSIXlisp.parse_eval("a", env)
         self.assertEqual(val, 44)
 
