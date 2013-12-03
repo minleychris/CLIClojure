@@ -97,5 +97,9 @@ class TestDataStructures(unittest.TestCase):
         val = POSIXlisp.parse_eval("false", POSIXlisp.create_base_env())
         self.assertEqual(val, POSIXlisp.Boolean("false"))
 
+    def test_nil(self):
+        val = POSIXlisp.parse_eval("nil", POSIXlisp.create_base_env())
+        self.assertEqual(val, POSIXlisp.Nil())
+
 if __name__ == '__main__':
     unittest.main()
