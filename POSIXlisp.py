@@ -8,7 +8,7 @@ from parsimonious.grammar import Grammar
 
 
 
-class ISeq:
+class ISeq(object):
     def first():
         pass
     def rest():
