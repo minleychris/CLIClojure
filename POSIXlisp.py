@@ -179,7 +179,7 @@ class Boolean(object):
 
 
 
-class Environment:
+class Environment(object):
     def __init__(self, parent=None):
         self.parent = parent
         self.env = {}
