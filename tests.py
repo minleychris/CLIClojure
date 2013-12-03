@@ -90,5 +90,12 @@ class TestDataStructures(unittest.TestCase):
         val = POSIXlisp.parse_eval(":keyword", POSIXlisp.create_base_env())
         self.assertEqual(val, POSIXlisp.Keyword(":keyword"))
 
+    def test_boolean(self):
+        val = POSIXlisp.parse_eval("true", POSIXlisp.create_base_env())
+        self.assertEqual(val, POSIXlisp.Boolean("true"))
+
+        val = POSIXlisp.parse_eval("false", POSIXlisp.create_base_env())
+        self.assertEqual(val, POSIXlisp.Boolean("false"))
+
 if __name__ == '__main__':
     unittest.main()

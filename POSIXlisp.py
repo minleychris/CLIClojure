@@ -162,6 +162,22 @@ class Keyword(object):
     def __hash__(self):
         return self._val.__hash__()
 
+class Boolean(object):
+    def __init__(self, val):
+        self._val = val == "true"
+
+    def __str__(self):
+        if self._val:
+            return "true"
+        return "false"
+
+    def __eq__(self, other):
+        return isinstance(other, Boolean) and self._val == other._val
+
+    def __hash__(self):
+        return self._val.__hash__()
+
+
 
 class Environment:
     def __init__(self, parent=None):
@@ -263,6 +279,8 @@ def eval(exp, env):
         return exp
     if isinstance(exp, String):
         return exp
+    if isinstance(exp, Boolean):
+        return exp
     if isinstance(exp, Symbol):
         return env.resolve(exp)
     if isinstance(exp, Keyword):
@@ -278,13 +296,14 @@ def eval(exp, env):
 
 grammar = Grammar(
     """
-    exp = number / symbol / s_exp / vector / string / keyword
+    exp = number / boolean / symbol / s_exp / vector / string / keyword
     number = ~"[0-9]+"
     symbol = ~"[+=a-zA-Z][+=a-zA-Z0-9]*"
     s_exp  = "(" (exp space)* exp ")"
     vector = "[" (exp space)* exp "]"
     string = ~"\\".*\\""
     keyword = ~":.*"
+    boolean = "true" / "false"
     space = " "
     """)
 
@@ -327,6 +346,8 @@ def tree_to_vector(tree):
             lst = vec.cons(Keyword(node["text"]))
         elif node["type"] == "string":
             lst = vec.cons(String(node["text"][1:-1]))
+        elif node["type"] == "boolean":
+            lst = vec.cons(Boolean(node["text"]))
 
     return vec
 
@@ -350,6 +371,8 @@ def tree_to_list(tree):
             lst = List(Keyword(node["text"]), lst)
         elif node["type"] == "string":
             lst = List(String(node["text"][1:-1]), lst)
+        elif node["type"] == "boolean":
+            lst = List(Boolean(node["text"]), lst)
 
     if tree["type"] == "exp":
         return lst.first()
