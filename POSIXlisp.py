@@ -264,7 +264,7 @@ def tree_to_vector(tree):
         elif node["type"] == "symbol":
             lst = vec.cons(Symbol(node["text"]))
         elif node["type"] == "string":
-            lst = vec.cons(node["text"])
+            lst = vec.cons(node["text"][1:-1])
 
     return vec
 
@@ -285,7 +285,7 @@ def tree_to_list(tree):
         elif node["type"] == "symbol":
             lst = List(Symbol(node["text"]), lst)
         elif node["type"] == "string":
-            lst = List(node["text"], lst)
+            lst = List(node["text"][1:-1], lst)
 
     if tree["type"] == "exp":
         return lst.first()

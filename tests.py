@@ -84,7 +84,7 @@ class TestDataStructures(unittest.TestCase):
 
     def test_string(self):
         val = POSIXlisp.parse_eval("\"string\"", POSIXlisp.create_base_env())
-        self.assertEqual(val, "\"string\"")
+        self.assertEqual(val, "string")
 
 if __name__ == '__main__':
     unittest.main()
