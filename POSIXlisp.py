@@ -8,10 +8,18 @@ from parsimonious.grammar import Grammar
 
 
 
-class List:
-    def __init__(self, head=None, rest=None):
-        self.head = head
-        self.rest = rest
+class ISeq:
+    def first():
+        pass
+    def rest():
+        pass
+    def cons(n):
+        pass
+
+class List(ISeq):
+    def __init__(self, head=None, tail=None):
+        self._head = head
+        self._tail = tail
 
     def __iter__(self):
         class ListIterator:
@@ -20,19 +28,55 @@ class List:
             def next(self):
                 if self.lst is None:
                     raise StopIteration
-                head = self.lst.head
-                self.lst = self.lst.rest
+                head = self.lst._head
+                self.lst = self.lst._tail
                 return head
 
         return ListIterator(self)
 
     def _inner_str(self):
-        if self.rest is None:
-            return self.head.__str__()
-        return self.head.__str__() + " " + self.rest._inner_str()
+        if self._tail is None:
+            return self._head.__str__()
+        return self._head.__str__() + " " + self._tail._inner_str()
 
     def __str__(self):
         return "(" + self._inner_str() + ")"
+
+    def first(self):
+        return self._head
+    def rest(self):
+        return self._tail
+    def cons(self, n):
+        return List(n, self)
+
+class Vector(ISeq):
+    def __init__(self, data=None):
+        if data is None:
+            self.data = []
+        else:
+            self.data = data
+
+    def __iter__(self):
+        return self.data.__iter__()
+
+    def __str__(self):
+        ret = "["
+
+        for i in range(0, len(self.data)):
+            if i != 0:
+                ret = ret + " "
+            ret = ret + str(self.data[i])
+
+        return ret + "]"
+
+
+    def first(self):
+        return self.data[0]
+    def rest(self):
+        return Vector(self.data[1:])
+    def cons(self, n):
+        self.data.append(n)
+        return self
 
 class Environment:
     def __init__(self, parent=None):
@@ -59,23 +103,23 @@ class Environment:
 
 
 def IF(args, env):
-    if eval(args.head, env):
-        return eval(args.rest.head, env)
+    if eval(args.first(), env):
+        return eval(args.rest().first(), env)
     else:
-        return eval(args.rest.rest.head, env)
+        return eval(args.rest().rest().first(), env)
 
 def QUOTE(args, env):
-    return args.head
+    return args.first()
 
 def DEF(args, env):
-    name = args.head
-    value = eval(args.rest.head, env)
+    name = args.first()
+    value = eval(args.rest().first(), env)
     env.assign(name, value);
     return name
 
 def FN(args, env):
-    argz = args.head
-    body = args.rest.head
+    argz = args.first()
+    body = args.rest().first()
 
     class Func:
         def __init__(self, argz, body):
@@ -96,13 +140,13 @@ def FN(args, env):
 
 
 def CONS(*args):
-    return List(args[0], args[1])
+    return args[1].cons(args[0])
 
 def FIRST(*args):
-    return args[0].head
+    return args[0].first()
 
 def REST(*args):
-    return args[0].rest
+    return args[0].rest()
 
 def PLUS(*args):
     return sum(args)
@@ -118,8 +162,8 @@ def is_special(func):
 
 
 def eval_s_exp(s_exp, env):
-    rest = s_exp.rest
-    func = eval(s_exp.head, env)
+    rest = s_exp.rest()
+    func = eval(s_exp.first(), env)
 
     if is_special(func):
         return func(rest, env)
@@ -136,6 +180,8 @@ def eval(exp, env):
         return env.resolve(exp)
     if isinstance(exp, List):
         return eval_s_exp(exp, env)
+    if isinstance(exp, Vector):
+        return exp
 
 
 
@@ -143,10 +189,11 @@ def eval(exp, env):
 
 grammar = Grammar(
     """
-    exp = number / symbol / s_exp
+    exp = number / symbol / s_exp / vector
     number = ~"[0-9]+"
     symbol = ~"[+=a-zA-Z][+=a-zA-Z0-9]*"
     s_exp  = "(" (exp space)* exp ")"
+    vector  = "[" (exp space)* exp "]"
     space = " "
     """)
 
@@ -172,6 +219,22 @@ def reduce_exp_tree(exp):
             'children': children,
             'text': exp.text}
 
+def tree_to_vector(tree):
+
+    vec = Vector()
+
+    for node in tree["children"]:
+        if node["type"] == "s_exp":
+            lst = vec.cons(tree_to_list(node))
+        if node["type"] == "vector":
+            lst = vec.cons(tree_to_vector(node))
+        elif node["type"] == "number":
+            lst = vec.cons(int(node["text"]))
+        elif node["type"] == "symbol":
+            lst = vec.cons(node["text"])
+
+    return vec
+
 def tree_to_list(tree):
     """
     Put the tree into the internal list structure.  Ideally we'd load it into this in the first place, though...
@@ -182,13 +245,15 @@ def tree_to_list(tree):
     for node in reversed(tree["children"]):
         if node["type"] == "s_exp":
             lst = List(tree_to_list(node), lst)
+        if node["type"] == "vector":
+            lst = List(tree_to_vector(node), lst)
         elif node["type"] == "number":
             lst = List(int(node["text"]), lst)
         elif node["type"] == "symbol":
             lst = List(node["text"], lst)
 
     if tree["type"] == "exp":
-        return lst.head
+        return lst.first()
     else:
         return lst;
 

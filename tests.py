@@ -1,6 +1,9 @@
 import unittest
 import POSIXlisp
 
+def is_vector(form):
+    return isinstance(form, POSIXlisp.Vector)
+
 def is_list(form):
     return isinstance(form, POSIXlisp.List)
 
@@ -17,6 +20,10 @@ class TestSpecialForms(unittest.TestCase):
         self.assertEqual(val.__str__(), "(1 2 3)")
         self.assertTrue(is_list(val))
 
+        val = POSIXlisp.parse_eval("(quote [1 2 3])", POSIXlisp.create_base_env())
+        self.assertEqual(val.__str__(), "[1 2 3]")
+        self.assertTrue(is_vector(val))
+
     def test_def(self):
         env = POSIXlisp.create_base_env()
         val = POSIXlisp.parse_eval("(def a 44)", env)
@@ -25,7 +32,7 @@ class TestSpecialForms(unittest.TestCase):
         self.assertEqual(val, 44)
 
     def test_fn(self):
-        val = POSIXlisp.parse_eval("((fn (a) (+ 1 a)) 2)", POSIXlisp.create_base_env())
+        val = POSIXlisp.parse_eval("((fn [a] (+ 1 a)) 2)", POSIXlisp.create_base_env())
         self.assertEqual(val.__str__(), "3")
 
 class TestFunctions(unittest.TestCase):
@@ -45,8 +52,15 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(val.__str__(), "(1 2 3)")
         self.assertTrue(is_list(val))
 
+        val = POSIXlisp.parse_eval("(cons 1 [2 3])", POSIXlisp.create_base_env())
+        self.assertEqual(val.__str__(), "[2 3 1]")
+        self.assertTrue(is_vector(val))
+
     def test_first(self):
         val = POSIXlisp.parse_eval("(first (quote (1 2 3)))", POSIXlisp.create_base_env())
+        self.assertEqual(val, 1)
+
+        val = POSIXlisp.parse_eval("(first [1 2 3])", POSIXlisp.create_base_env())
         self.assertEqual(val, 1)
 
     def test_rest(self):
@@ -54,13 +68,19 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(val.__str__(), "(2 3)")
         self.assertTrue(is_list(val))
 
+        val = POSIXlisp.parse_eval("(rest [1 2 3])", POSIXlisp.create_base_env())
+        self.assertEqual(val.__str__(), "[2 3]")
+        self.assertTrue(is_vector(val))
+
 class TestDataStructures(unittest.TestCase):
 
     def test_int(self):
         val = POSIXlisp.parse_eval("1", POSIXlisp.create_base_env())
         self.assertEqual(val, 1)
 
-
+    def test_vector(self):
+        val = POSIXlisp.parse_eval("[1 2 3]", POSIXlisp.create_base_env())
+        self.assertEqual(val.__str__(), "[1 2 3]")
 
 if __name__ == '__main__':
     unittest.main()
