@@ -86,22 +86,22 @@ class Symbol(object):
         return self._val
 
     def __lt__(self, other):
-        return self._val.__lt__(other._val)
+        return isinstance(other, Symbol) and self._val.__lt__(other._val)
 
     def __le__(self, other):
-        return self._val.__le__(other._val)
+        return isinstance(other, Symbol) and self._val.__le__(other._val)
 
     def __eq__(self, other):
-        return self._val.__eq__(other._val)
+        return isinstance(other, Symbol) and self._val.__eq__(other._val)
 
     def __ne__(self, other):
-        return self._val.__ne__(other._val)
+        return isinstance(other, Symbol) and self._val.__ne__(other._val)
 
     def __gt__(self, other):
-        return self._val.__gt__(other._val)
+        return isinstance(other, Symbol) and self._val.__gt__(other._val)
 
     def __ge__(self, other):
-        return self._val.__ge__(other._val)
+        return isinstance(other, Symbol) and self._val.__ge__(other._val)
 
     def __hash__(self):
         return self._val.__hash__()
@@ -114,22 +114,22 @@ class String(object):
         return "\"" + self._val + "\""
 
     def __lt__(self, other):
-        return self._val.__lt__(other._val)
+        return isinstance(other, String) and self._val.__lt__(other._val)
 
     def __le__(self, other):
-        return self._val.__le__(other._val)
+        return isinstance(other, String) and self._val.__le__(other._val)
 
     def __eq__(self, other):
-        return self._val.__eq__(other._val)
+        return isinstance(other, String) and self._val.__eq__(other._val)
 
     def __ne__(self, other):
-        return self._val.__ne__(other._val)
+        return isinstance(other, String) and self._val.__ne__(other._val)
 
     def __gt__(self, other):
-        return self._val.__gt__(other._val)
+        return isinstance(other, String) and self._val.__gt__(other._val)
 
     def __ge__(self, other):
-        return self._val.__ge__(other._val)
+        return isinstance(other, String) and self._val.__ge__(other._val)
 
     def __hash__(self):
         return self._val.__hash__()
