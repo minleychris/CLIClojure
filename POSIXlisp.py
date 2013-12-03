@@ -106,6 +106,34 @@ class Symbol(object):
     def __hash__(self):
         return self._val.__hash__()
 
+class String(object):
+    def __init__(self, val):
+        self._val = val
+
+    def __str__(self):
+        return "\"" + self._val + "\""
+
+    def __lt__(self, other):
+        return self._val.__lt__(other._val)
+
+    def __le__(self, other):
+        return self._val.__le__(other._val)
+
+    def __eq__(self, other):
+        return self._val.__eq__(other._val)
+
+    def __ne__(self, other):
+        return self._val.__ne__(other._val)
+
+    def __gt__(self, other):
+        return self._val.__gt__(other._val)
+
+    def __ge__(self, other):
+        return self._val.__ge__(other._val)
+
+    def __hash__(self):
+        return self._val.__hash__()
+
 class Environment:
     def __init__(self, parent=None):
         self.parent = parent
@@ -204,7 +232,7 @@ def eval_s_exp(s_exp, env):
 def eval(exp, env):
     if isinstance(exp, int):
         return exp
-    if isinstance(exp, str):
+    if isinstance(exp, String):
         return exp
     if isinstance(exp, Symbol):
         return env.resolve(exp)
@@ -264,7 +292,7 @@ def tree_to_vector(tree):
         elif node["type"] == "symbol":
             lst = vec.cons(Symbol(node["text"]))
         elif node["type"] == "string":
-            lst = vec.cons(node["text"][1:-1])
+            lst = vec.cons(String(node["text"][1:-1]))
 
     return vec
 
@@ -285,7 +313,7 @@ def tree_to_list(tree):
         elif node["type"] == "symbol":
             lst = List(Symbol(node["text"]), lst)
         elif node["type"] == "string":
-            lst = List(node["text"][1:-1], lst)
+            lst = List(String(node["text"][1:-1]), lst)
 
     if tree["type"] == "exp":
         return lst.first()
