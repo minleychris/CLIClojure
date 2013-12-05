@@ -274,6 +274,20 @@ def FN(args, env):
 
     return Func(argz, body)
 
+def LET(args, env):
+    argz = args.first()
+    body = args.rest().first()
+
+    new_env = Environment(env)
+    for i in range(0,len(argz)/2):
+        name = argz[i*2]
+        val = eval(argz[(i*2)+1], new_env)
+        new_env.assign(name, val)
+
+    return eval(body, new_env)
+
+
+
 
 
 def CONS(*args):
@@ -294,7 +308,7 @@ def EQUALS(*args):
 
 
 def is_special(func):
-    return func in [IF, QUOTE, DEF, FN]
+    return func in [IF, QUOTE, DEF, FN, LET]
 
 
 
@@ -439,6 +453,7 @@ def create_base_env():
                Symbol("quote"): QUOTE,
                Symbol("def"): DEF,
                Symbol("fn"): FN,
+               Symbol("let"): LET,
                Symbol("+"): PLUS,
                Symbol("="): EQUALS,
                Symbol("cons"): CONS,
