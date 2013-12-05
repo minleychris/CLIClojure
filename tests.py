@@ -101,5 +101,9 @@ class TestDataStructures(unittest.TestCase):
         val = POSIXlisp.parse_eval("nil", POSIXlisp.create_base_env())
         self.assertEqual(val, POSIXlisp.Nil())
 
+    def test_map(self):
+        val = POSIXlisp.parse_eval("{:a 1}", POSIXlisp.create_base_env())
+        self.assertEqual(val.__str__(), "{:a 1}")
+
 if __name__ == '__main__':
     unittest.main()

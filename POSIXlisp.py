@@ -78,6 +78,28 @@ class Vector(ISeq):
         self.data.append(n)
         return self
 
+class Map(object):
+    def __init__(self):
+        self._data = {}
+
+    def assoc(self, key, value):
+        self._data[key] = value
+        return self
+
+    def dissoc(self, key):
+        del self._data[key]
+        return self
+
+    def get(self, key):
+        return self._data
+
+    def __str__(self):
+        ret = "{"
+        for k,v in self._data.iteritems():
+            ret = ret + str(k) + " " + str(v)
+        ret = ret + "}"
+        return ret
+
 class Symbol(object):
     def __init__(self, val):
         self._val = val
@@ -299,6 +321,8 @@ def eval(exp, env):
         return eval_s_exp(exp, env)
     if isinstance(exp, Vector):
         return exp
+    if isinstance(exp, Map):
+        return exp
 
 
 
@@ -306,14 +330,15 @@ def eval(exp, env):
 
 grammar = Grammar(
     """
-    exp = number / boolean / nil / symbol / s_exp / vector / string / keyword
+    exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map
     number = ~"[0-9]+"
     symbol = ~"[+=a-zA-Z][+=a-zA-Z0-9]*"
     s_exp  = "(" (exp space)* exp ")"
     vector = "[" (exp space)* exp "]"
     string = ~"\\".*\\""
-    keyword = ~":.*"
+    keyword = ~":[a-z]*"
     boolean = "true" / "false"
+    map = "{" exp space exp "}"
     nil = "nil"
     space = " "
     """)
@@ -368,6 +393,18 @@ def tree_to_vector(tree):
         vec.cons(process_tree(node))
 
     return vec
+
+def tree_to_map(tree):
+
+    ma = Map()
+
+    for i in range(0,len(tree["children"])/2):
+        key = tree["children"][i*2]
+        value = tree["children"][(i*2)+1]
+
+        ma.assoc(process_tree(key), process_tree(value))
+
+    return ma
 
 def tree_to_list(tree):
     """
