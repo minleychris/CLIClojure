@@ -59,6 +59,12 @@ class Vector(ISeq):
     def __iter__(self):
         return self.data.__iter__()
 
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, i):
+        return self.data[i]
+
     def __str__(self):
         ret = "["
 
