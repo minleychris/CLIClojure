@@ -340,27 +340,32 @@ def reduce_exp_tree(exp):
             'children': children,
             'text': exp.text}
 
+def process_tree(node):
+    if node["type"] == "s_exp":
+        return tree_to_list(node)
+    elif node["type"] == "vector":
+        return tree_to_vector(node)
+    elif node["type"] == "map":
+        return tree_to_map(node)
+    elif node["type"] == "number":
+        return int(node["text"])
+    elif node["type"] == "symbol":
+        return Symbol(node["text"])
+    elif node["type"] == "keyword":
+        return Keyword(node["text"])
+    elif node["type"] == "string":
+        return String(node["text"][1:-1])
+    elif node["type"] == "boolean":
+        return Boolean(node["text"])
+    elif node["type"] == "nil":
+        return Nil()
+
 def tree_to_vector(tree):
 
     vec = Vector()
 
     for node in tree["children"]:
-        if node["type"] == "s_exp":
-            lst = vec.cons(tree_to_list(node))
-        if node["type"] == "vector":
-            lst = vec.cons(tree_to_vector(node))
-        elif node["type"] == "number":
-            lst = vec.cons(int(node["text"]))
-        elif node["type"] == "symbol":
-            lst = vec.cons(Symbol(node["text"]))
-        elif node["type"] == "keyword":
-            lst = vec.cons(Keyword(node["text"]))
-        elif node["type"] == "string":
-            lst = vec.cons(String(node["text"][1:-1]))
-        elif node["type"] == "boolean":
-            lst = vec.cons(Boolean(node["text"]))
-        elif node["type"] == "nil":
-            lst = vec.cons(Nil())
+        vec.cons(process_tree(node))
 
     return vec
 
@@ -372,22 +377,7 @@ def tree_to_list(tree):
     lst = None
 
     for node in reversed(tree["children"]):
-        if node["type"] == "s_exp":
-            lst = List(tree_to_list(node), lst)
-        if node["type"] == "vector":
-            lst = List(tree_to_vector(node), lst)
-        elif node["type"] == "number":
-            lst = List(int(node["text"]), lst)
-        elif node["type"] == "symbol":
-            lst = List(Symbol(node["text"]), lst)
-        elif node["type"] == "keyword":
-            lst = List(Keyword(node["text"]), lst)
-        elif node["type"] == "string":
-            lst = List(String(node["text"][1:-1]), lst)
-        elif node["type"] == "boolean":
-            lst = List(Boolean(node["text"]), lst)
-        elif node["type"] == "nil":
-            lst = List(Nil(), lst)
+        lst = List(process_tree(node), lst)
 
     if tree["type"] == "exp":
         return lst.first()
