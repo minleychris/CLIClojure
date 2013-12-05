@@ -286,7 +286,12 @@ def LET(args, env):
 
     return eval(body, new_env)
 
+def DO(args, env):
+    last = Nil()
+    for form in args:
+        last = eval(form, env)
 
+    return last
 
 
 
@@ -308,7 +313,7 @@ def EQUALS(*args):
 
 
 def is_special(func):
-    return func in [IF, QUOTE, DEF, FN, LET]
+    return func in [IF, QUOTE, DEF, FN, LET, DO]
 
 
 
@@ -454,6 +459,7 @@ def create_base_env():
                Symbol("def"): DEF,
                Symbol("fn"): FN,
                Symbol("let"): LET,
+               Symbol("do"): DO,
                Symbol("+"): PLUS,
                Symbol("="): EQUALS,
                Symbol("cons"): CONS,

@@ -41,6 +41,13 @@ class TestSpecialForms(unittest.TestCase):
         val = POSIXlisp.parse_eval("(let [a 1 b (+ a 1)] (+ b 1))", POSIXlisp.create_base_env())
         self.assertEqual(val.__str__(), "3")
 
+    def test_do(self):
+        env = POSIXlisp.create_base_env()
+        val = POSIXlisp.parse_eval("(do (def a 44) 4)", env)
+        self.assertEqual(val, 4)
+        val = POSIXlisp.parse_eval("a", env)
+        self.assertEqual(val, 44)
+
 class TestFunctions(unittest.TestCase):
 
     def test_plus(self):
