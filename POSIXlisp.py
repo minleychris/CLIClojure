@@ -215,17 +215,17 @@ class Nil(object):
 
 
 
-class Environment(object):
+class Namespace(object):
     def __init__(self, parent=None):
         self.parent = parent
-        self.env = {}
+        self.ns = {}
 
     def assign(self, name, value):
-        self.env[name] = value
+        self.ns[name] = value
 
     def resolve(self, name):
-        if self.env.has_key(name):
-            return self.env[name]
+        if self.ns.has_key(name):
+            return self.ns[name]
 
         if self.parent != None:
             return self.parent.resolve(name)
@@ -234,27 +234,27 @@ class Environment(object):
 
     def __str__(self):
         if self.parent is None:
-            return self.env.__str__() + " => None"
-        return self.env.__str__() + " => " + self.parent.__str__()
+            return self.ns.__str__() + " => None"
+        return self.ns.__str__() + " => " + self.parent.__str__()
 
 
 
-def IF(args, env):
-    if eval(args.first(), env):
-        return eval(args.rest().first(), env)
+def IF(args, ns):
+    if eval(args.first(), ns):
+        return eval(args.rest().first(), ns)
     else:
-        return eval(args.rest().rest().first(), env)
+        return eval(args.rest().rest().first(), ns)
 
-def QUOTE(args, env):
+def QUOTE(args, ns):
     return args.first()
 
-def DEF(args, env):
+def DEF(args, ns):
     name = args.first()
-    value = eval(args.rest().first(), env)
-    env.assign(name, value);
+    value = eval(args.rest().first(), ns)
+    ns.assign(name, value);
     return name
 
-def FN(args, env):
+def FN(args, ns):
     argz = args.first()
     body = args.rest().first()
 
@@ -264,32 +264,32 @@ def FN(args, env):
             self.body = body
 
         def __call__(self, *args):
-            new_env = Environment(env)
+            new_ns = Namespace(ns)
             i=0
             for arg in argz:
-                new_env.assign(arg, args[i])
+                new_ns.assign(arg, args[i])
                 i = i+1
 
-            return eval(body, new_env)
+            return eval(body, new_ns)
 
     return Func(argz, body)
 
-def LET(args, env):
+def LET(args, ns):
     argz = args.first()
     body = args.rest().first()
 
-    new_env = Environment(env)
+    new_ns = Namespace(ns)
     for i in range(0,len(argz)/2):
         name = argz[i*2]
-        val = eval(argz[(i*2)+1], new_env)
-        new_env.assign(name, val)
+        val = eval(argz[(i*2)+1], new_ns)
+        new_ns.assign(name, val)
 
-    return eval(body, new_env)
+    return eval(body, new_ns)
 
-def DO(args, env):
+def DO(args, ns):
     last = Nil()
     for form in args:
-        last = eval(form, env)
+        last = eval(form, ns)
 
     return last
 
@@ -317,19 +317,19 @@ def is_special(func):
 
 
 
-def eval_s_exp(s_exp, env):
+def eval_s_exp(s_exp, ns):
     rest = s_exp.rest()
-    func = eval(s_exp.first(), env)
+    func = eval(s_exp.first(), ns)
 
     if is_special(func):
-        return func(rest, env)
+        return func(rest, ns)
     else:
         if rest is None:
             return func()
-        evaled = map(lambda r: eval(r, env), rest)
+        evaled = map(lambda r: eval(r, ns), rest)
         return func(*evaled)
 
-def eval(exp, env):
+def eval(exp, ns):
     if isinstance(exp, int):
         return exp
     if isinstance(exp, String):
@@ -339,11 +339,11 @@ def eval(exp, env):
     if isinstance(exp, Nil):
         return exp
     if isinstance(exp, Symbol):
-        return env.resolve(exp)
+        return ns.resolve(exp)
     if isinstance(exp, Keyword):
         return exp
     if isinstance(exp, List):
-        return eval_s_exp(exp, env)
+        return eval_s_exp(exp, ns)
     if isinstance(exp, Vector):
         return exp
     if isinstance(exp, Map):
@@ -447,14 +447,14 @@ def tree_to_list(tree):
         return lst;
 
 
-def parse_eval(input, env):
+def parse_eval(input, ns):
     reduced_tree = reduce_exp_tree(grammar.parse(input))
     program_list = tree_to_list(reduced_tree)
-    return eval(program_list, env)
+    return eval(program_list, ns)
 
-def create_base_env():
-    env = Environment()
-    env.env = {Symbol("if"): IF,
+def create_base_ns():
+    ns = Namespace()
+    ns.ns = {Symbol("if"): IF,
                Symbol("quote"): QUOTE,
                Symbol("def"): DEF,
                Symbol("fn"): FN,
@@ -465,14 +465,14 @@ def create_base_env():
                Symbol("cons"): CONS,
                Symbol("first"): FIRST,
                Symbol("rest"): REST}
-    return env
+    return ns
 
 def main(argv=None):
-    env = create_base_env()
+    ns = create_base_ns()
 
     while True:
         line = raw_input("=> ")
-        print(parse_eval(line, env))
+        print(parse_eval(line, ns))
 
 if __name__ == "__main__":
     sys.exit(main())
