@@ -455,16 +455,16 @@ def parse_eval(input, ns):
 def create_base_ns():
     ns = Namespace()
     ns.ns = {Symbol("if"): IF,
-               Symbol("quote"): QUOTE,
-               Symbol("def"): DEF,
-               Symbol("fn"): FN,
-               Symbol("let"): LET,
-               Symbol("do"): DO,
-               Symbol("+"): PLUS,
-               Symbol("="): EQUALS,
-               Symbol("cons"): CONS,
-               Symbol("first"): FIRST,
-               Symbol("rest"): REST}
+             Symbol("quote"): QUOTE,
+             Symbol("def"): DEF,
+             Symbol("fn"): FN,
+             Symbol("let"): LET,
+             Symbol("do"): DO,
+             Symbol("+"): PLUS,
+             Symbol("="): EQUALS,
+             Symbol("cons"): CONS,
+             Symbol("first"): FIRST,
+             Symbol("rest"): REST}
     return ns
 
 def main(argv=None):
