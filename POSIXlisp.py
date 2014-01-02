@@ -382,6 +382,9 @@ def NS(args, __env):
     CURRENT_NS = ns
     return ns
 
+def COMMENT(args, __env):
+    return Nil()
+
 
 def CONS(*args):
     return args[1].cons(args[0])
@@ -409,7 +412,7 @@ def WITH_META(obj, m):
 
 
 def is_special(func):
-    return func in [IF, QUOTE, DEF, FN, LET, DO, NS]
+    return func in [IF, QUOTE, DEF, FN, LET, DO, NS, COMMENT]
 
 
 
@@ -559,6 +562,7 @@ def create_base_ns():
              Symbol("let"): LET,
              Symbol("do"): DO,
              Symbol("ns"): NS,
+             Symbol("comment"): COMMENT,
              Symbol("+"): PLUS,
              Symbol("="): EQUALS,
              Symbol("cons"): CONS,

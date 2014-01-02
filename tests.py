@@ -58,6 +58,11 @@ class TestSpecialForms(unittest.TestCase):
         val = POSIXlisp.parse_eval("+", val)
         self.assertEqual(val, None)
 
+    def test_comment(self):
+        ns = POSIXlisp.create_base_ns()
+        val = POSIXlisp.parse_eval("(comment test)", ns)
+        self.assertEqual(val.__str__(), "nil")
+
 class TestFunctions(unittest.TestCase):
 
     def test_plus(self):
