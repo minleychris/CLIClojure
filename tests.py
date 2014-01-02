@@ -48,6 +48,16 @@ class TestSpecialForms(unittest.TestCase):
         val = POSIXlisp.parse_eval("a", ns)
         self.assertEqual(val, 44)
 
+    def test_ns(self):
+        ns = POSIXlisp.create_base_ns()
+        val = POSIXlisp.parse_eval("(ns clojure.core)", ns)
+        val = POSIXlisp.parse_eval("(+ 1 1)", val)
+        self.assertEqual(val, 2)
+
+        val = POSIXlisp.parse_eval("(ns test)", ns)
+        val = POSIXlisp.parse_eval("+", val)
+        self.assertEqual(val, None)
+
 class TestFunctions(unittest.TestCase):
 
     def test_plus(self):

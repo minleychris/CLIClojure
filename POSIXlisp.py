@@ -215,8 +215,12 @@ class Nil(object):
 
 
 
+# TODO: How to handle function environment vs namespace
 class Namespace(object):
-    def __init__(self, parent=None):
+    mappings = {}
+
+    def __init__(self, name, parent=None):
+        self.name = name
         self.parent = parent
         self.ns = {}
 
@@ -237,6 +241,15 @@ class Namespace(object):
             return self.ns.__str__() + " => None"
         return self.ns.__str__() + " => " + self.parent.__str__()
 
+    @classmethod
+    def find_or_create(cls, name):
+        if cls.mappings.has_key(name):
+            return cls.mappings[name]
+        ns = Namespace(name)
+        cls.mappings[name] = ns
+        return ns
+
+CURRENT_NS = None
 
 
 def IF(args, ns):
@@ -264,7 +277,7 @@ def FN(args, ns):
             self.body = body
 
         def __call__(self, *args):
-            new_ns = Namespace(ns)
+            new_ns = Namespace("temp", ns)
             i=0
             for arg in argz:
                 new_ns.assign(arg, args[i])
@@ -278,7 +291,7 @@ def LET(args, ns):
     argz = args.first()
     body = args.rest().first()
 
-    new_ns = Namespace(ns)
+    new_ns = Namespace("temp", ns)
     for i in range(0,len(argz)/2):
         name = argz[i*2]
         val = eval(argz[(i*2)+1], new_ns)
@@ -293,6 +306,12 @@ def DO(args, ns):
 
     return last
 
+def NS(args, __env):
+    global CURRENT_NS
+    nsname = args.first()
+    ns = Namespace.find_or_create(nsname)
+    CURRENT_NS = ns
+    return ns
 
 
 def CONS(*args):
@@ -313,7 +332,7 @@ def EQUALS(*args):
 
 
 def is_special(func):
-    return func in [IF, QUOTE, DEF, FN, LET, DO]
+    return func in [IF, QUOTE, DEF, FN, LET, DO, NS]
 
 
 
@@ -357,7 +376,7 @@ grammar = Grammar(
     """
     exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map
     number = ~"[0-9]+"
-    symbol = ~"[+=a-zA-Z][+=a-zA-Z0-9]*"
+    symbol = ~"[+=a-zA-Z][.+=a-zA-Z0-9]*"
     s_exp  = "(" (exp space)* exp ")"
     vector = "[" (exp space)* exp "]"
     string = ~"\\".*\\""
@@ -453,13 +472,14 @@ def parse_eval(input, ns):
     return eval(program_list, ns)
 
 def create_base_ns():
-    ns = Namespace()
+    ns = Namespace.find_or_create(Symbol("clojure.core"))
     ns.ns = {Symbol("if"): IF,
              Symbol("quote"): QUOTE,
              Symbol("def"): DEF,
              Symbol("fn"): FN,
              Symbol("let"): LET,
              Symbol("do"): DO,
+             Symbol("ns"): NS,
              Symbol("+"): PLUS,
              Symbol("="): EQUALS,
              Symbol("cons"): CONS,
@@ -468,11 +488,12 @@ def create_base_ns():
     return ns
 
 def main(argv=None):
-    ns = create_base_ns()
+    global CURRENT_NS
+    CURRENT_NS = create_base_ns()
 
     while True:
-        line = raw_input("=> ")
-        print(parse_eval(line, ns))
+        line = raw_input(str(CURRENT_NS.name) + "=> ")
+        print(parse_eval(line, CURRENT_NS))
 
 if __name__ == "__main__":
     sys.exit(main())
