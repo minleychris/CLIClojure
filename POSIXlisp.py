@@ -455,7 +455,7 @@ grammar = Grammar(
     """
     exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map
     number = ~"[0-9]+"
-    symbol = ~"[+=\-a-zA-Z][.+=\-a-zA-Z0-9]*"
+    symbol = ~"[*+=!_?\-a-zA-Z][.*+=!_?\-a-zA-Z0-9]*"
     s_exp  = "(" (exp space)* exp ")"
     vector = "[" (exp space)* exp "]"
     string = ~"\\".*\\""
