@@ -8,6 +8,44 @@ from parsimonious.grammar import Grammar
 
 
 
+class IMeta(object):
+    def meta(self):
+        pass
+
+class IReference(IMeta):
+    def alterMeta(self, alterFn, args):
+        pass;
+    def resetMeta(self, m):
+        pass
+
+class AReference(IReference):
+    def __init__(self, meta=None):
+        self._meta = meta
+
+    def meta(self):
+        return self._meta
+
+    def alterMeta(self, alterFn, args):
+# TODO: This isn't implemented yet...        self._meta = alterFn.applyTo(Cons(self._meta, args))
+        return self._meta
+
+    def resetMeta(self, m):
+        self._meta = m
+
+class IObj(IMeta):
+    def withMeta(self, meta):
+        pass
+
+class Obj(IObj):
+    def __init__(self, meta=None):
+        self._meta = meta
+
+    def meta(self):
+        return self._meta
+
+    def withMeta(self, meta):
+        pass
+
 class ISeq(object):
     def first(self):
         pass
@@ -16,8 +54,13 @@ class ISeq(object):
     def cons(self, n):
         pass
 
-class List(ISeq):
-    def __init__(self, head=None, tail=None):
+class ASeq(Obj, ISeq):
+    def __init__(self, meta=None):
+        Obj.__init__(self, meta)
+
+class List(ASeq):
+    def __init__(self, head=None, tail=None, meta=None):
+        ASeq.__init__(self, meta)
         self._head = head
         self._tail = tail
 
@@ -48,9 +91,12 @@ class List(ISeq):
         return self._tail
     def cons(self, n):
         return List(n, self)
+    def withMeta(self, meta):
+        return List(self._head, self._tail, meta)
 
-class Vector(ISeq):
-    def __init__(self, data=None):
+class Vector(ASeq):
+    def __init__(self, data=None, meta=None):
+        ASeq.__init__(self, meta)
         if data is None:
             self.data = []
         else:
@@ -83,10 +129,16 @@ class Vector(ISeq):
     def cons(self, n):
         self.data.append(n)
         return self
+    def withMeta(self, meta):
+        return Vector(self.data, meta)
 
-class Map(object):
-    def __init__(self):
-        self._data = {}
+class Map(IObj):
+    def __init__(self, data=None, meta=None):
+        if data is None:
+            self._data = {}
+        else:
+            self._data = data
+        self._meta = meta
 
     def assoc(self, key, value):
         self._data[key] = value
@@ -106,9 +158,16 @@ class Map(object):
         ret = ret + "}"
         return ret
 
-class Symbol(object):
-    def __init__(self, val):
+    def meta(self):
+        return self._meta
+
+    def withMeta(self, meta):
+        return Map(self._data, meta)
+
+class Symbol(IObj):
+    def __init__(self, val, meta = None):
         self._val = val
+        self._meta = meta
 
     def __str__(self):
         return self._val
@@ -133,6 +192,12 @@ class Symbol(object):
 
     def __hash__(self):
         return self._val.__hash__()
+
+    def meta(self):
+        return self._meta
+
+    def withMeta(self, meta):
+        return Symbol(self._val, self._meta)
 
 class String(object):
     def __init__(self, val):
@@ -213,13 +278,17 @@ class Nil(object):
                                 cls, *args, **kwargs)
         return cls._instance
 
+    def __str__(self):
+        return "nil"
+
 
 
 # TODO: How to handle function environment vs namespace
-class Namespace(object):
+class Namespace(AReference):
     mappings = {}
 
-    def __init__(self, name, parent=None):
+    def __init__(self, name, parent=None, meta=None):
+        AReference.__init__(self, meta);
         self.name = name
         self.parent = parent
         self.ns = {}
@@ -329,6 +398,14 @@ def PLUS(*args):
 def EQUALS(*args):
     return reduce(lambda x,y: x==y, args)
 
+def META(obj):
+    if isinstance(obj, IMeta):
+        return obj.meta()
+    return Nil()
+
+def WITH_META(obj, m):
+    return obj.withMeta(m)
+
 
 
 def is_special(func):
@@ -349,6 +426,8 @@ def eval_s_exp(s_exp, ns):
         return func(*evaled)
 
 def eval(exp, ns):
+    if exp is None:
+        return Nil()
     if isinstance(exp, int):
         return exp
     if isinstance(exp, String):
@@ -376,7 +455,7 @@ grammar = Grammar(
     """
     exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map
     number = ~"[0-9]+"
-    symbol = ~"[+=a-zA-Z][.+=a-zA-Z0-9]*"
+    symbol = ~"[+=\-a-zA-Z][.+=\-a-zA-Z0-9]*"
     s_exp  = "(" (exp space)* exp ")"
     vector = "[" (exp space)* exp "]"
     string = ~"\\".*\\""
@@ -484,7 +563,9 @@ def create_base_ns():
              Symbol("="): EQUALS,
              Symbol("cons"): CONS,
              Symbol("first"): FIRST,
-             Symbol("rest"): REST}
+             Symbol("rest"): REST,
+             Symbol("meta"): META,
+             Symbol("with-meta"): WITH_META}
     return ns
 
 def main(argv=None):

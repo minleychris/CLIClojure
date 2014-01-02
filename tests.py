@@ -95,6 +95,13 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(val.__str__(), "[2 3]")
         self.assertTrue(is_vector(val))
 
+    def test_meta(self):
+        val = POSIXlisp.parse_eval("(meta [1 2 3])", POSIXlisp.create_base_ns())
+        self.assertEqual(val.__str__(), "None")
+
+        val = POSIXlisp.parse_eval("(meta (with-meta [1 2 3] \"x\"))", POSIXlisp.create_base_ns())
+        self.assertEqual(val.__str__(), "\"x\"")
+
 class TestDataStructures(unittest.TestCase):
 
     def test_int(self):
