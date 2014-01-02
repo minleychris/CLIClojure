@@ -9,11 +9,11 @@ from parsimonious.grammar import Grammar
 
 
 class ISeq(object):
-    def first():
+    def first(self):
         pass
-    def rest():
+    def rest(self):
         pass
-    def cons(n):
+    def cons(self, n):
         pass
 
 class List(ISeq):
