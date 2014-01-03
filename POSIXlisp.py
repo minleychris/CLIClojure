@@ -466,7 +466,7 @@ grammar = Grammar(
     exps = whitespace* (exp whitespace*)+
     exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map / reader_macro
     number = ~"[0-9]+"
-    symbol = ~"[*+=!_?\-a-zA-Z][.*+=!_?\-a-zA-Z0-9]*"
+    symbol = ~"[&*+=!_?\-a-zA-Z][.&*+=!_?\-a-zA-Z0-9]*"
     s_exp  = "(" whitespace* (exp whitespace*)* ")"
     vector = "[" whitespace* (exp whitespace*)* "]"
     string = ~"\\".*\\""
