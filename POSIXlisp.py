@@ -403,7 +403,10 @@ def EQUALS(*args):
 
 def META(obj):
     if isinstance(obj, IMeta):
-        return obj.meta()
+        meta = obj.meta()
+        if meta is None:
+            return Nil()
+        return meta
     return Nil()
 
 def WITH_META(obj, m):
@@ -429,8 +432,6 @@ def eval_s_exp(s_exp, ns):
         return func(*evaled)
 
 def eval(exp, ns):
-    if exp is None:
-        return Nil()
     if isinstance(exp, int):
         return exp
     if isinstance(exp, String):

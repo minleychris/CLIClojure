@@ -56,7 +56,7 @@ class TestSpecialForms(unittest.TestCase):
 
         val = POSIXlisp.parse_eval("(ns test)", ns)
         val = POSIXlisp.parse_eval("+", val)
-        self.assertEqual(val, None)
+        self.assertEqual(val, None) # TODO: Should be exception
 
     def test_comment(self):
         ns = POSIXlisp.create_base_ns()
@@ -102,7 +102,7 @@ class TestFunctions(unittest.TestCase):
 
     def test_meta(self):
         val = POSIXlisp.parse_eval("(meta [1 2 3])", POSIXlisp.create_base_ns())
-        self.assertEqual(val.__str__(), "None")
+        self.assertEqual(val.__str__(), "nil")
 
         val = POSIXlisp.parse_eval("(meta (with-meta [1 2 3] \"x\"))", POSIXlisp.create_base_ns())
         self.assertEqual(val.__str__(), "\"x\"")
