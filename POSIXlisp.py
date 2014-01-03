@@ -1,22 +1,22 @@
 #!/usr/bin/python
 
 import sys
-import getopt
-import re
 
 from parsimonious.grammar import Grammar
-
 
 
 class IMeta(object):
     def meta(self):
         pass
 
+
 class IReference(IMeta):
     def alterMeta(self, alterFn, args):
-        pass;
+        pass
+
     def resetMeta(self, m):
         pass
+
 
 class AReference(IReference):
     def __init__(self, meta=None):
@@ -32,9 +32,11 @@ class AReference(IReference):
     def resetMeta(self, m):
         self._meta = m
 
+
 class IObj(IMeta):
     def withMeta(self, meta):
         pass
+
 
 class Obj(IObj):
     def __init__(self, meta=None):
@@ -46,17 +48,22 @@ class Obj(IObj):
     def withMeta(self, meta):
         pass
 
+
 class ISeq(object):
     def first(self):
         pass
+
     def rest(self):
         pass
+
     def cons(self, n):
         pass
+
 
 class ASeq(Obj, ISeq):
     def __init__(self, meta=None):
         Obj.__init__(self, meta)
+
 
 class List(ASeq):
     def __init__(self, head=None, tail=None, meta=None):
@@ -68,6 +75,7 @@ class List(ASeq):
         class ListIterator:
             def __init__(self, lst):
                 self.lst = lst
+
             def next(self):
                 if self.lst is None:
                     raise StopIteration
@@ -87,12 +95,16 @@ class List(ASeq):
 
     def first(self):
         return self._head
+
     def rest(self):
         return self._tail
+
     def cons(self, n):
         return List(n, self)
+
     def withMeta(self, meta):
         return List(self._head, self._tail, meta)
+
 
 class Vector(ASeq):
     def __init__(self, data=None, meta=None):
@@ -116,21 +128,24 @@ class Vector(ASeq):
 
         for i in range(0, len(self.data)):
             if i != 0:
-                ret = ret + " "
-            ret = ret + str(self.data[i])
+                ret += " "
+            ret += str(self.data[i])
 
         return ret + "]"
 
-
     def first(self):
         return self.data[0]
+
     def rest(self):
         return Vector(self.data[1:])
+
     def cons(self, n):
         self.data.append(n)
         return self
+
     def withMeta(self, meta):
         return Vector(self.data, meta)
+
 
 class Map(IObj):
     def __init__(self, data=None, meta=None):
@@ -153,11 +168,11 @@ class Map(IObj):
 
     def __str__(self):
         ret = "{"
-        for k,v in self._data.iteritems():
+        for k, v in self._data.iteritems():
             if len(ret) > 1:
-                ret = ret + ", "
+                ret += ", "
             ret = ret + str(k) + " " + str(v)
-        ret = ret + "}"
+        ret += "}"
         return ret
 
     def meta(self):
@@ -166,8 +181,9 @@ class Map(IObj):
     def withMeta(self, meta):
         return Map(self._data, meta)
 
+
 class Symbol(IObj):
-    def __init__(self, val, meta = None):
+    def __init__(self, val, meta=None):
         self._val = val
         self._meta = meta
 
@@ -201,6 +217,7 @@ class Symbol(IObj):
     def withMeta(self, meta):
         return Symbol(self._val, self._meta)
 
+
 class String(object):
     def __init__(self, val):
         self._val = val
@@ -228,6 +245,7 @@ class String(object):
 
     def __hash__(self):
         return self._val.__hash__()
+
 
 class Keyword(object):
     def __init__(self, val):
@@ -257,6 +275,7 @@ class Keyword(object):
     def __hash__(self):
         return self._val.__hash__()
 
+
 class Boolean(object):
     def __init__(self, val):
         self._val = val == "true"
@@ -272,17 +291,17 @@ class Boolean(object):
     def __hash__(self):
         return self._val.__hash__()
 
+
 class Nil(object):
     _instance = None
+
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(Nil, cls).__new__(
-                                cls, *args, **kwargs)
+            cls._instance = super(Nil, cls).__new__(cls, *args)
         return cls._instance
 
     def __str__(self):
         return "nil"
-
 
 
 # TODO: How to handle function environment vs namespace
@@ -290,7 +309,7 @@ class Namespace(AReference):
     mappings = {}
 
     def __init__(self, name, parent=None, meta=None):
-        AReference.__init__(self, meta);
+        AReference.__init__(self, meta)
         self.name = name
         self.parent = parent
         self.ns = {}
@@ -299,10 +318,10 @@ class Namespace(AReference):
         self.ns[name] = value
 
     def resolve(self, name):
-        if self.ns.has_key(name):
+        if name in self.ns:
             return self.ns[name]
 
-        if self.parent != None:
+        if self.parent is not None:
             return self.parent.resolve(name)
 
         return None
@@ -314,7 +333,7 @@ class Namespace(AReference):
 
     @classmethod
     def find_or_create(cls, name):
-        if cls.mappings.has_key(name):
+        if name in cls.mappings.has_key:
             return cls.mappings[name]
         ns = Namespace(name)
         cls.mappings[name] = ns
@@ -324,22 +343,25 @@ CURRENT_NS = None
 
 
 def IF(args, ns):
-    if eval(args.first(), ns):
-        return eval(args.rest().first(), ns)
+    if l_eval(args.first(), ns):
+        return l_eval(args.rest().first(), ns)
     else:
-        return eval(args.rest().rest().first(), ns)
+        return l_eval(args.rest().rest().first(), ns)
+
 
 def QUOTE(args, ns):
     return args.first()
 
+
 def DEF(args, ns):
     name = args.first()
     if args.rest() is not None:
-        value = eval(args.rest().first(), ns)
+        value = l_eval(args.rest().first(), ns)
     else:
         value = None
     ns.assign(name, value)
     return name
+
 
 def FN(args, ns):
     argz = args.first()
@@ -352,33 +374,36 @@ def FN(args, ns):
 
         def __call__(self, *args):
             new_ns = Namespace("temp", ns)
-            i=0
+            i = 0
             for arg in argz:
                 new_ns.assign(arg, args[i])
-                i = i+1
+                i += 1
 
-            return eval(body, new_ns)
+            return l_eval(body, new_ns)
 
     return Func(argz, body)
+
 
 def LET(args, ns):
     argz = args.first()
     body = args.rest().first()
 
     new_ns = Namespace("temp", ns)
-    for i in range(0,len(argz)/2):
+    for i in range(0, len(argz)/2):
         name = argz[i*2]
-        val = eval(argz[(i*2)+1], new_ns)
+        val = l_eval(argz[(i*2)+1], new_ns)
         new_ns.assign(name, val)
 
-    return eval(body, new_ns)
+    return l_eval(body, new_ns)
+
 
 def DO(args, ns):
     last = Nil()
     for form in args:
-        last = eval(form, ns)
+        last = l_eval(form, ns)
 
     return last
+
 
 def NS(args, __env):
     global CURRENT_NS
@@ -387,6 +412,7 @@ def NS(args, __env):
     CURRENT_NS = ns
     return ns
 
+
 def COMMENT(args, __env):
     return Nil()
 
@@ -394,17 +420,22 @@ def COMMENT(args, __env):
 def CONS(*args):
     return args[1].cons(args[0])
 
+
 def FIRST(*args):
     return args[0].first()
+
 
 def REST(*args):
     return args[0].rest()
 
+
 def PLUS(*args):
     return sum(args)
 
+
 def EQUALS(*args):
-    return reduce(lambda x,y: x==y, args)
+    return reduce(lambda x, y: x == y, args)
+
 
 def META(obj):
     if isinstance(obj, IMeta):
@@ -414,29 +445,29 @@ def META(obj):
         return meta
     return Nil()
 
+
 def WITH_META(obj, m):
     return obj.withMeta(m)
-
 
 
 def is_special(func):
     return func in [IF, QUOTE, DEF, FN, LET, DO, NS, COMMENT]
 
 
-
 def eval_s_exp(s_exp, ns):
     rest = s_exp.rest()
-    func = eval(s_exp.first(), ns)
+    func = l_eval(s_exp.first(), ns)
 
     if is_special(func):
         return func(rest, ns)
     else:
         if rest is None:
             return func()
-        evaled = map(lambda r: eval(r, ns), rest)
+        evaled = map(lambda r: l_eval(r, ns), rest)
         return func(*evaled)
 
-def eval(exp, ns):
+
+def l_eval(exp, ns):
     if isinstance(exp, int):
         return exp
     if isinstance(exp, String):
@@ -455,9 +486,6 @@ def eval(exp, ns):
         return exp
     if isinstance(exp, Map):
         return exp
-
-
-
 
 
 grammar = Grammar(
@@ -484,6 +512,7 @@ grammar = Grammar(
     reader_metadata = "^" map whitespace exp
     """)
 
+
 def reduce_exp_tree(exp):
     """
     Trim the tree to get rid of unwanted nodes.  Ideally we wouldn't create them in the first place, though...
@@ -497,7 +526,8 @@ def reduce_exp_tree(exp):
     for node in exp.children:
         child = reduce_exp_tree(node)
         if child:
-            if child['type'] != "" and child['type'] != "whitespace" and child['type'] != "single_whitespace_char" and child['type'] != "exp":
+            if child['type'] != "" and child['type'] != "whitespace" and child['type'] != "single_whitespace_char"\
+                    and child['type'] != "exp":
                 children.append(child)
             else:
                 children.extend(child['children'])
@@ -505,6 +535,7 @@ def reduce_exp_tree(exp):
     return {'type': exp.expr_name,
             'children': children,
             'text': exp.text}
+
 
 def process_tree(node):
     if node["type"] == "s_exp":
@@ -528,6 +559,7 @@ def process_tree(node):
     elif node["type"] == "reader_macro":
         return process_reader_macro(node["children"][0])
 
+
 def process_reader_macro(node):
     if node["type"] == "reader_comment":
         return None
@@ -547,12 +579,13 @@ def process_reader_macro(node):
             if isinstance(exp, IReference):
                 exp.resetMeta(meta)
                 return exp
-            else:
+            elif isinstance(exp, IObj):  # TODO: Maybe remove for speed???
                 # TODO: Merge with existing meta
                 return exp.withMeta(meta)
         else:
             #TODO: Throw error
             raise Exception
+
 
 def tree_to_vector(tree):
 
@@ -563,17 +596,19 @@ def tree_to_vector(tree):
 
     return vec
 
+
 def tree_to_map(tree):
 
     ma = Map()
 
-    for i in range(0,len(tree["children"])/2):
+    for i in range(0, len(tree["children"])/2):
         key = tree["children"][i*2]
         value = tree["children"][(i*2)+1]
 
         ma.assoc(process_tree(key), process_tree(value))
 
     return ma
+
 
 def tree_to_list(tree):
     """
@@ -588,19 +623,20 @@ def tree_to_list(tree):
     if tree["type"] == "exp":
         return lst.first()
     else:
-        return lst;
+        return lst
 
 
-def parse_eval(input, ns):
-    reduced_tree = reduce_exp_tree(grammar.parse(input))
+def parse_eval(inp, ns):
+    reduced_tree = reduce_exp_tree(grammar.parse(inp))
     program_list = tree_to_list(reduced_tree)
 
     ret = []
 
     for exp in program_list:
-        ret.append(eval(exp, ns))
+        ret.append(l_eval(exp, ns))
 
     return ret
+
 
 def create_base_ns():
     ns = Namespace.find_or_create(Symbol("clojure.core"))
@@ -620,6 +656,7 @@ def create_base_ns():
              Symbol("meta"): META,
              Symbol("with-meta"): WITH_META}
     return ns
+
 
 def main(argv=None):
     global CURRENT_NS
