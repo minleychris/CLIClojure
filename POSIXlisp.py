@@ -524,6 +524,15 @@ def process_tree(node):
 def process_reader_macro(node):
     if node["type"] == "reader_comment":
         return None
+    if node["type"] == "reader_quote":
+        quote = {'type': "symbol",
+                 'children': [],
+                 'text': "quote"}
+        new_children = node["children"]
+        new_children.insert(0, quote)
+        return process_tree({'type': "s_exp",
+                             'children': node["children"],
+                             'text': node["text"]})
 
 def tree_to_vector(tree):
 

@@ -162,5 +162,14 @@ class TestReaderMacros(unittest.TestCase):
         self.assertEqual(val[0], None)
         self.assertEqual(len(val), 1)
 
+    def test_quote(self):
+        val = eval_one("'(1 2 3)")
+        self.assertEqual(val.__str__(), "(1 2 3)")
+        self.assertTrue(is_list(val))
+
+        val = eval_one("'[1 2 3]")
+        self.assertEqual(val.__str__(), "[1 2 3]")
+        self.assertTrue(is_vector(val))
+
 if __name__ == '__main__':
     unittest.main()
