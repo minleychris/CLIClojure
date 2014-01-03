@@ -470,11 +470,11 @@ grammar = Grammar(
     map = "{" exp whitespace exp "}"
     nil = "nil"
     whitespace = single_whitespace_char+
-    single_whitespace_char = " " / "/n" / "/t" / "/r" / ","
+    single_whitespace_char = " " / "\\n" / "\\t" / "\\r" / ","
 
     # reader macro table
     reader_macro = reader_comment / reader_quote / reader_metadata
-    reader_comment = ~";.*$"
+    reader_comment = ~";.*$"M
     reader_quote = "'" exp
     reader_metadata = "^" map whitespace exp
     """)
