@@ -458,6 +458,7 @@ def eval(exp, ns):
 grammar = Grammar(
     """
     # regular language
+    exps = (exp space)* exp
     exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map / reader_macro
     number = ~"[0-9]+"
     symbol = ~"[*+=!_?\-a-zA-Z][.*+=!_?\-a-zA-Z0-9]*"
@@ -564,7 +565,13 @@ def tree_to_list(tree):
 def parse_eval(input, ns):
     reduced_tree = reduce_exp_tree(grammar.parse(input))
     program_list = tree_to_list(reduced_tree)
-    return eval(program_list, ns)
+
+    ret = []
+
+    for exp in program_list:
+        ret.append(eval(exp, ns))
+
+    return ret
 
 def create_base_ns():
     ns = Namespace.find_or_create(Symbol("clojure.core"))
@@ -591,7 +598,10 @@ def main(argv=None):
 
     while True:
         line = raw_input(str(CURRENT_NS.name) + "=> ")
-        print(parse_eval(line, CURRENT_NS))
+        evaled = parse_eval(line, CURRENT_NS)
+        for val in evaled:
+            if val is not None:
+                print val
 
 if __name__ == "__main__":
     sys.exit(main())
