@@ -140,5 +140,11 @@ class TestDataStructures(unittest.TestCase):
         val = POSIXlisp.parse_eval("{:a 1}", POSIXlisp.create_base_ns())
         self.assertEqual(val.__str__(), "{:a 1}")
 
+class TestReaderMacros(unittest.TestCase):
+
+    def test_comment(self):
+        val = POSIXlisp.parse_eval(";a", POSIXlisp.create_base_ns())
+        self.assertEqual(val, None)
+
 if __name__ == '__main__':
     unittest.main()

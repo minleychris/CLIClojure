@@ -457,7 +457,8 @@ def eval(exp, ns):
 
 grammar = Grammar(
     """
-    exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map
+    # regular language
+    exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map / reader_macro
     number = ~"[0-9]+"
     symbol = ~"[*+=!_?\-a-zA-Z][.*+=!_?\-a-zA-Z0-9]*"
     s_exp  = "(" (exp space)* exp ")"
@@ -468,6 +469,11 @@ grammar = Grammar(
     map = "{" exp space exp "}"
     nil = "nil"
     space = " "
+
+    # reader macro table
+    reader_macro = reader_comment / reader_quote
+    reader_comment = ~";.*$"
+    reader_quote = "'" exp
     """)
 
 def reduce_exp_tree(exp):
@@ -511,6 +517,12 @@ def process_tree(node):
         return Boolean(node["text"])
     elif node["type"] == "nil":
         return Nil()
+    elif node["type"] == "reader_macro":
+        return process_reader_macro(node["children"][0])
+
+def process_reader_macro(node):
+    if node["type"] == "reader_comment":
+        return None
 
 def tree_to_vector(tree):
 
