@@ -334,8 +334,11 @@ def QUOTE(args, ns):
 
 def DEF(args, ns):
     name = args.first()
-    value = eval(args.rest().first(), ns)
-    ns.assign(name, value);
+    if args.rest() is not None:
+        value = eval(args.rest().first(), ns)
+    else:
+        value = None
+    ns.assign(name, value)
     return name
 
 def FN(args, ns):
