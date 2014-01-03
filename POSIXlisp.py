@@ -164,7 +164,7 @@ class Map(IObj):
         return self
 
     def get(self, key):
-        return self._data
+        return self._data[key]
 
     def __str__(self):
         ret = "{"
@@ -658,7 +658,7 @@ def create_base_ns():
     return ns
 
 
-def main(argv=None):
+def main():
     global CURRENT_NS
     CURRENT_NS = create_base_ns()
 
