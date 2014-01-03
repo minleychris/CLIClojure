@@ -333,7 +333,7 @@ class Namespace(AReference):
 
     @classmethod
     def find_or_create(cls, name):
-        if name in cls.mappings.has_key:
+        if name in cls.mappings:
             return cls.mappings[name]
         ns = Namespace(name)
         cls.mappings[name] = ns
