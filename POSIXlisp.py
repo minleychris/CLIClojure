@@ -154,6 +154,8 @@ class Map(IObj):
     def __str__(self):
         ret = "{"
         for k,v in self._data.iteritems():
+            if len(ret) > 1:
+                ret = ret + ", "
             ret = ret + str(k) + " " + str(v)
         ret = ret + "}"
         return ret
@@ -467,7 +469,7 @@ grammar = Grammar(
     string = ~"\\".*\\""
     keyword = ~":[a-z]*"
     boolean = "true" / "false"
-    map = "{" exp whitespace exp "}"
+    map = "{" whitespace* (exp whitespace exp whitespace*)* "}"
     nil = "nil"
     whitespace = single_whitespace_char+
     single_whitespace_char = " " / "\\n" / "\\t" / "\\r" / ","

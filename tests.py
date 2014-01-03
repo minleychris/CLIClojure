@@ -148,6 +148,9 @@ class TestDataStructures(unittest.TestCase):
         val = eval_one("{:a 1}")
         self.assertEqual(val.__str__(), "{:a 1}")
 
+        val = eval_one("{:a 1 :b 2}")
+        self.assertEqual(val.__str__(), "{:a 1, :b 2}")
+
 class TestReaderMacros(unittest.TestCase):
 
     def test_comment(self):
