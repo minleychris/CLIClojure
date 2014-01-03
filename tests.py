@@ -1,19 +1,24 @@
 import unittest
 import POSIXlisp
 
+
 def is_vector(form):
     return isinstance(form, POSIXlisp.Vector)
+
 
 def is_list(form):
     return isinstance(form, POSIXlisp.List)
 
+
 def eval_one(s, ns=None):
     return eval_all(s, ns)[0]
+
 
 def eval_all(s, ns=None):
     if ns is None:
         ns = POSIXlisp.create_base_ns()
     return POSIXlisp.parse_eval(s, ns)
+
 
 class TestSpecialForms(unittest.TestCase):
 
@@ -64,12 +69,13 @@ class TestSpecialForms(unittest.TestCase):
 
         val = eval_one("(ns test)", ns)
         val = eval_one("+", val)
-        self.assertEqual(val, None) # TODO: Should be exception
+        self.assertEqual(val, None)  # TODO: Should be exception
 
     def test_comment(self):
         ns = POSIXlisp.create_base_ns()
         val = eval_one("(comment test)", ns)
         self.assertEqual(val.__str__(), "nil")
+
 
 class TestFunctions(unittest.TestCase):
 
@@ -115,6 +121,7 @@ class TestFunctions(unittest.TestCase):
         val = eval_one("(meta (with-meta [1 2 3] \"x\"))")
         self.assertEqual(val.__str__(), "\"x\"")
 
+
 class TestDataStructures(unittest.TestCase):
 
     def test_int(self):
@@ -150,6 +157,7 @@ class TestDataStructures(unittest.TestCase):
 
         val = eval_one("{:a 1 :b 2}")
         self.assertEqual(val.__str__(), "{:a 1, :b 2}")
+
 
 class TestReaderMacros(unittest.TestCase):
 
