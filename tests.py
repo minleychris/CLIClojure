@@ -171,5 +171,10 @@ class TestReaderMacros(unittest.TestCase):
         self.assertEqual(val.__str__(), "[1 2 3]")
         self.assertTrue(is_vector(val))
 
+    def test_metadata(self):
+        val = eval_one("(meta ^{:test true} [1 2 3])")
+        self.assertEqual(val.__str__(), "{:test true}")
+
+
 if __name__ == '__main__':
     unittest.main()

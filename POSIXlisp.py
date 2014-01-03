@@ -458,23 +458,25 @@ def eval(exp, ns):
 grammar = Grammar(
     """
     # regular language
-    exps = (exp space)* exp
+    exps = (exp whitespace)* exp
     exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map / reader_macro
     number = ~"[0-9]+"
     symbol = ~"[*+=!_?\-a-zA-Z][.*+=!_?\-a-zA-Z0-9]*"
-    s_exp  = "(" (exp space)* exp ")"
-    vector = "[" (exp space)* exp "]"
+    s_exp  = "(" (exp whitespace)* exp ")"
+    vector = "[" (exp whitespace)* exp "]"
     string = ~"\\".*\\""
     keyword = ~":[a-z]*"
     boolean = "true" / "false"
-    map = "{" exp space exp "}"
+    map = "{" exp whitespace exp "}"
     nil = "nil"
-    space = " "
+    whitespace = single_whitespace_char+
+    single_whitespace_char = " " / "/n" / "/t" / "/r" / ","
 
     # reader macro table
-    reader_macro = reader_comment / reader_quote
+    reader_macro = reader_comment / reader_quote / reader_metadata
     reader_comment = ~";.*$"
     reader_quote = "'" exp
+    reader_metadata = "^" map whitespace exp
     """)
 
 def reduce_exp_tree(exp):
@@ -490,7 +492,7 @@ def reduce_exp_tree(exp):
     for node in exp.children:
         child = reduce_exp_tree(node)
         if child:
-            if child['type'] != "" and child['type'] != "space" and child['type'] != "exp":
+            if child['type'] != "" and child['type'] != "whitespace" and child['type'] != "single_whitespace_char" and child['type'] != "exp":
                 children.append(child)
             else:
                 children.extend(child['children'])
@@ -524,7 +526,7 @@ def process_tree(node):
 def process_reader_macro(node):
     if node["type"] == "reader_comment":
         return None
-    if node["type"] == "reader_quote":
+    elif node["type"] == "reader_quote":
         quote = {'type': "symbol",
                  'children': [],
                  'text': "quote"}
@@ -533,6 +535,19 @@ def process_reader_macro(node):
         return process_tree({'type': "s_exp",
                              'children': node["children"],
                              'text': node["text"]})
+    elif node["type"] == "reader_metadata":
+        meta = process_tree(node["children"][0])
+        exp = process_tree(node["children"][1])
+        if isinstance(exp, IMeta):
+            if isinstance(exp, IReference):
+                exp.resetMeta(meta)
+                return exp
+            else:
+                # TODO: Merge with existing meta
+                return exp.withMeta(meta)
+        else:
+            #TODO: Throw error
+            raise Exception
 
 def tree_to_vector(tree):
 
