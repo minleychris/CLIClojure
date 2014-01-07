@@ -1,5 +1,6 @@
 import unittest
 import POSIXlisp
+import clojure.lang
 
 
 def is_vector(form):
@@ -7,7 +8,7 @@ def is_vector(form):
 
 
 def is_list(form):
-    return isinstance(form, POSIXlisp.List)
+    return isinstance(form, clojure.lang.PersistentList)
 
 
 def eval_one(s, ns=None):

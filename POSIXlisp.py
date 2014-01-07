@@ -1,13 +1,9 @@
 #!/usr/bin/python
 
 import sys
+from clojure.lang import *
 
 from parsimonious.grammar import Grammar
-
-
-class IMeta(object):
-    def meta(self):
-        pass
 
 
 class IReference(IMeta):
@@ -31,79 +27,6 @@ class AReference(IReference):
 
     def resetMeta(self, m):
         self._meta = m
-
-
-class IObj(IMeta):
-    def withMeta(self, meta):
-        pass
-
-
-class Obj(IObj):
-    def __init__(self, meta=None):
-        self._meta = meta
-
-    def meta(self):
-        return self._meta
-
-    def withMeta(self, meta):
-        pass
-
-
-class ISeq(object):
-    def first(self):
-        pass
-
-    def rest(self):
-        pass
-
-    def cons(self, n):
-        pass
-
-
-class ASeq(Obj, ISeq):
-    def __init__(self, meta=None):
-        Obj.__init__(self, meta)
-
-
-class List(ASeq):
-    def __init__(self, head=None, tail=None, meta=None):
-        ASeq.__init__(self, meta)
-        self._head = head
-        self._tail = tail
-
-    def __iter__(self):
-        class ListIterator:
-            def __init__(self, lst):
-                self.lst = lst
-
-            def next(self):
-                if self.lst is None:
-                    raise StopIteration
-                head = self.lst._head
-                self.lst = self.lst._tail
-                return head
-
-        return ListIterator(self)
-
-    def _inner_str(self):
-        if self._tail is None:
-            return self._head.__str__()
-        return self._head.__str__() + " " + self._tail._inner_str()
-
-    def __str__(self):
-        return "(" + self._inner_str() + ")"
-
-    def first(self):
-        return self._head
-
-    def rest(self):
-        return self._tail
-
-    def cons(self, n):
-        return List(n, self)
-
-    def withMeta(self, meta):
-        return List(self._head, self._tail, meta)
 
 
 class Vector(ASeq):
@@ -136,7 +59,7 @@ class Vector(ASeq):
     def first(self):
         return self.data[0]
 
-    def rest(self):
+    def next(self):
         return Vector(self.data[1:])
 
     def cons(self, n):
@@ -344,9 +267,9 @@ CURRENT_NS = None
 
 def IF(args, ns):
     if l_eval(args.first(), ns):
-        return l_eval(args.rest().first(), ns)
+        return l_eval(args.next().first(), ns)
     else:
-        return l_eval(args.rest().rest().first(), ns)
+        return l_eval(args.next().next().first(), ns)
 
 
 def QUOTE(args, ns):
@@ -355,8 +278,8 @@ def QUOTE(args, ns):
 
 def DEF(args, ns):
     name = args.first()
-    if args.rest() is not None:
-        value = l_eval(args.rest().first(), ns)
+    if args.next() is not None:
+        value = l_eval(args.next().first(), ns)
     else:
         value = None
     ns.assign(name, value)
@@ -365,7 +288,7 @@ def DEF(args, ns):
 
 def FN(args, ns):
     argz = args.first()
-    body = args.rest().first()
+    body = args.next().first()
 
     class Func:
         def __init__(self, argz, body):
@@ -386,7 +309,7 @@ def FN(args, ns):
 
 def LET(args, ns):
     argz = args.first()
-    body = args.rest().first()
+    body = args.next().first()
 
     new_ns = Namespace("temp", ns)
     for i in range(0, len(argz)/2):
@@ -426,7 +349,7 @@ def FIRST(*args):
 
 
 def REST(*args):
-    return args[0].rest()
+    return args[0].next()
 
 
 def PLUS(*args):
@@ -455,7 +378,7 @@ def is_special(func):
 
 
 def eval_s_exp(s_exp, ns):
-    rest = s_exp.rest()
+    rest = s_exp.next()
     func = l_eval(s_exp.first(), ns)
 
     if is_special(func):
@@ -480,7 +403,7 @@ def l_eval(exp, ns):
         return ns.resolve(exp)
     if isinstance(exp, Keyword):
         return exp
-    if isinstance(exp, List):
+    if isinstance(exp, PersistentList):
         return eval_s_exp(exp, ns)
     if isinstance(exp, Vector):
         return exp
@@ -615,10 +538,10 @@ def tree_to_list(tree):
     Put the tree into the internal list structure.  Ideally we'd load it into this in the first place, though...
     """
 
-    lst = None
+    lst = PersistentList.EMPTY
 
     for node in reversed(tree["children"]):
-        lst = List(process_tree(node), lst)
+        lst = lst.cons(process_tree(node))
 
     if tree["type"] == "exp":
         return lst.first()
