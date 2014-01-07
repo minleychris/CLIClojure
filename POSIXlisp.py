@@ -506,7 +506,7 @@ def process_reader_macro(node):
                 # TODO: Merge with existing meta
                 return exp.withMeta(meta)
         else:
-            #TODO: Throw error
+            # TODO: Throw error
             raise Exception
 
 
