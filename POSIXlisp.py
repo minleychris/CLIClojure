@@ -540,7 +540,9 @@ def tree_to_list(tree):
     lst = PersistentList.EMPTY
 
     for node in reversed(tree["children"]):
-        lst = lst.cons(process_tree(node))
+        p_node = process_tree(node)
+        if p_node is not None:
+            lst = lst.cons(p_node)
 
     if tree["type"] == "exp":
         return lst.first()

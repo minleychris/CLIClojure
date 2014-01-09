@@ -163,15 +163,18 @@ class TestDataStructures(unittest.TestCase):
 class TestReaderMacros(unittest.TestCase):
 
     def test_comment(self):
-        val = eval_one(";a")
-        self.assertEqual(val, None)
+        val = eval_all(";a")
+        self.assertEqual(len(val), 0)
 
         val = eval_all("(+ 1 1) ;a")
         self.assertEqual(val[0], 2)
-        self.assertEqual(val[1], None)
+        self.assertEqual(len(val), 1)
 
         val = eval_all(";a (+ 1 1)")
-        self.assertEqual(val[0], None)
+        self.assertEqual(len(val), 0)
+
+        val = eval_all(";a\n (+ 1 1)")
+        self.assertEqual(val[0], 2)
         self.assertEqual(len(val), 1)
 
     def test_quote(self):
