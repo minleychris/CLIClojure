@@ -132,7 +132,7 @@ class PersistentList(ASeq, IReduce, Counted):  # TODO: Java implements List also
     @classmethod
     def create(cls, init):
         ret = PersistentList.EMPTY
-        for i in init:
+        for i in reversed(init):
             ret = ret.cons(i)
         return ret
 
@@ -151,7 +151,7 @@ class PersistentList(ASeq, IReduce, Counted):  # TODO: Java implements List also
         return self._rest
 
     def count(self):
-        return self.count
+        return self._count
 
     def cons(self, o):
         return PersistentList(self.meta(), o, self, self._count + 1)
@@ -245,19 +245,22 @@ class PersistentList(ASeq, IReduce, Counted):  # TODO: Java implements List also
         def seq(self):
             return None
 
+        def __iter__(self):
+            return [].__iter__()
+
 
 class creator(RestFn):  # TODO: static?????
     def getRequiredArity(self):
         return 0
 
-    def doInvoke(self, args):
+    def doInvoke(self, *args):
         # if isinstance(args, ArraySeq):  # TODO: When ArraySeq defined implement this optimisation
         #     Object[] argsarray = (Object[]) ((ArraySeq) args).array;
         #     IPersistentList ret = EMPTY;
         #     for(int i = argsarray.length - 1; i >= 0; --i)
         #         ret = (IPersistentList) ret.cons(argsarray[i]);
         #     return ret;
-        return PersistentList.create(list)
+        return PersistentList.create(args)
 
     def withMeta(self, meta):
         # TODO: Throw better error

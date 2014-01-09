@@ -128,6 +128,9 @@ class RestFn(AFunction):  # TODO: This is not implemented as fully as it probabl
     def getRequiredArity(self):
         pass
 
+    def invoke(self, *args):
+        return self.doInvoke(*args)
+
     def doInvoke(self, *args):
         return None
 
