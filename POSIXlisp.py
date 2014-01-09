@@ -290,12 +290,8 @@ def FN(args, ns):
     argz = args.first()
     body = args.next().first()
 
-    class Func:
-        def __init__(self, argz, body):
-            self.argz = argz
-            self.body = body
-
-        def __call__(self, *args):
+    class Func(AFunction):
+        def invoke(self, *args):
             new_ns = Namespace("temp", ns)
             i = 0
             for arg in argz:
@@ -304,7 +300,10 @@ def FN(args, ns):
 
             return l_eval(body, new_ns)
 
-    return Func(argz, body)
+        def applyTo(self, arglist):
+            self.invoke(*arglist)
+
+    return Func
 
 
 def LET(args, ns):
@@ -385,9 +384,9 @@ def eval_s_exp(s_exp, ns):
         return func(rest, ns)
     else:
         if rest is None:
-            return func()
+            return func().invoke()
         evaled = map(lambda r: l_eval(r, ns), rest)
-        return func(*evaled)
+        return func().invoke(*evaled)
 
 
 def l_eval(exp, ns):
