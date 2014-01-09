@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import types
 from clojure.lang import *
 
 from parsimonious.grammar import Grammar
@@ -249,6 +250,24 @@ class Namespace(AReference):
 
         return None
 
+    def resolveClass(self, name, mod=None):
+        parts = str(name).split('.', 1)
+        if len(parts) == 0:
+            return None
+        if len(parts) == 1:
+            return mod.__dict__[name]
+
+        if mod is None:
+            top_level, rest = parts
+            mod = sys.modules[top_level]
+            return self.resolveClass(rest, mod)
+        elif isinstance(mod, types.ModuleType):
+            top_level, rest = parts
+            mod = mod.__dict__[top_level]
+            return self.resolveClass(rest, mod)
+
+        return None
+
     def __str__(self):
         if self.parent is None:
             return self.ns.__str__() + " => None"
@@ -339,6 +358,18 @@ def COMMENT(args, __env):
     return Nil()
 
 
+def DOT(args, __env):
+    clazz = __env.resolveClass(args.first())
+    rest = args.next()
+    if isinstance(clazz, types.TypeType):
+        if rest.count() == 1:
+            member = rest.first()
+            return clazz.__dict__[member._val]
+        raise Exception  # TODO: implement this
+    else:
+        raise Exception  # TODO: implement this
+
+
 def CONS(*args):
     return args[1].cons(args[0])
 
@@ -373,7 +404,7 @@ def WITH_META(obj, m):
 
 
 def is_special(func):
-    return func in [IF, QUOTE, DEF, FN, LET, DO, NS, COMMENT]
+    return func in [IF, QUOTE, DEF, FN, LET, DO, NS, COMMENT, DOT]
 
 
 def eval_s_exp(s_exp, ns):
@@ -416,7 +447,7 @@ grammar = Grammar(
     exps = whitespace* (exp whitespace*)+
     exp = number / boolean / nil / symbol / s_exp / vector / string / keyword / map / reader_macro
     number = ~"[0-9]+"
-    symbol = ~"[&*+=!_?\-a-zA-Z][.&*+=!_?\-a-zA-Z0-9]*"
+    symbol = "." / ~"[&*+=!_?\-a-zA-Z][.&*+=!_?\-a-zA-Z0-9]*"
     s_exp  = "(" whitespace* (exp whitespace*)* ")"
     vector = "[" whitespace* (exp whitespace*)* "]"
     string = ~"\\".*\\""
@@ -572,6 +603,7 @@ def create_base_ns():
              Symbol("do"): DO,
              Symbol("ns"): NS,
              Symbol("comment"): COMMENT,
+             Symbol("."): DOT,
              Symbol("+"): PLUS,
              Symbol("="): EQUALS,
              Symbol("cons"): CONS,
