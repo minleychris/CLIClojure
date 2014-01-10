@@ -467,7 +467,7 @@ grammar = Grammar(
     reader_macro = reader_comment / reader_quote / reader_metadata
     reader_comment = ~";.*$"M
     reader_quote = "'" exp
-    reader_metadata = "^" map whitespace exp
+    reader_metadata = "^" (symbol / string / keyword / map) whitespace exp
     """)
 
 
@@ -532,6 +532,20 @@ def process_reader_macro(node):
                              'text': node["text"]})
     elif node["type"] == "reader_metadata":
         meta = process_tree(node["children"][0])
+
+        if isinstance(meta, Symbol) or isinstance(meta, String):
+            val = meta
+            meta = Map()
+            meta.assoc(Keyword(":tag"), val)
+        elif isinstance(meta, Keyword):
+            val = meta
+            meta = Map()
+            meta.assoc(val, Boolean("true"))
+        elif not isinstance(meta, Map):
+            print(type(meta))
+            # TODO: better throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String or Map");
+            raise Exception
+
         exp = process_tree(node["children"][1])
         if isinstance(exp, IMeta):
             if isinstance(exp, IReference):

@@ -190,6 +190,12 @@ class TestReaderMacros(unittest.TestCase):
         val = eval_one("(meta ^{:test true} [1 2 3])")
         self.assertEqual(val.__str__(), "{:test true}")
 
+        val = eval_one("(meta ^:test [1 2 3])")
+        self.assertEqual(val.__str__(), "{:test true}")
+
+        val = eval_one("(meta ^\"test\" [1 2 3])")
+        self.assertEqual(val.__str__(), "{:tag \"test\"}")
+
 
 if __name__ == '__main__':
     unittest.main()
