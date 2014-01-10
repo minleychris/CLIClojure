@@ -1,4 +1,5 @@
 from interfaces import *
+from Seqs import *
 
 
 def seq(coll):
@@ -62,3 +63,11 @@ def countFrom(o):
     # TODO: Throw better error
     raise Exception
     # throw new UnsupportedOperationException("count not supported on this type: " + o.getClass().getSimpleName());
+
+def cons(x, coll):
+    if coll is None:
+        return PersistentList(x)
+    elif isinstance(coll, ISeq):
+        return Cons(x, coll)
+    else:
+        return Cons(x, seq(coll))

@@ -7,8 +7,8 @@ def is_vector(form):
     return isinstance(form, POSIXlisp.Vector)
 
 
-def is_list(form):
-    return isinstance(form, clojure.lang.PersistentList)
+def is_seq(form):
+    return isinstance(form, clojure.lang.ISeq)
 
 
 def eval_one(s, ns=None):
@@ -32,7 +32,7 @@ class TestSpecialForms(unittest.TestCase):
     def test_quote(self):
         val = eval_one("(quote (1 2 3))")
         self.assertEqual(val.__str__(), "(1 2 3)")
-        self.assertTrue(is_list(val))
+        self.assertTrue(is_seq(val))
 
         val = eval_one("(quote [1 2 3])")
         self.assertEqual(val.__str__(), "[1 2 3]")
@@ -92,12 +92,16 @@ class TestFunctions(unittest.TestCase):
 
     def test_cons(self):
         val = eval_one("(cons 1 (quote (2 3)))")
-        self.assertEqual(val.__str__(), "(1 2 3)")
-        self.assertTrue(is_list(val))
+        self.assertEqual(val.first(), 1)
+        self.assertEqual(val.next().first(), 2)
+        self.assertEqual(val.next().next().first(), 3)
+        self.assertTrue(is_seq(val))
 
         val = eval_one("(cons 1 [2 3])")
-        self.assertEqual(val.__str__(), "[2 3 1]")
-        self.assertTrue(is_vector(val))
+        self.assertEqual(val.first(), 1)
+        self.assertEqual(val.next().first(), 2)
+        self.assertEqual(val.next().next().first(), 3)
+        self.assertTrue(is_seq(val))
 
     def test_first(self):
         val = eval_one("(first (quote (1 2 3)))")
@@ -109,7 +113,7 @@ class TestFunctions(unittest.TestCase):
     def test_rest(self):
         val = eval_one("(rest (quote (1 2 3)))")
         self.assertEqual(val.__str__(), "(2 3)")
-        self.assertTrue(is_list(val))
+        self.assertTrue(is_seq(val))
 
         val = eval_one("(rest [1 2 3])")
         self.assertEqual(val.__str__(), "[2 3]")
@@ -180,7 +184,7 @@ class TestReaderMacros(unittest.TestCase):
     def test_quote(self):
         val = eval_one("'(1 2 3)")
         self.assertEqual(val.__str__(), "(1 2 3)")
-        self.assertTrue(is_list(val))
+        self.assertTrue(is_seq(val))
 
         val = eval_one("'[1 2 3]")
         self.assertEqual(val.__str__(), "[1 2 3]")

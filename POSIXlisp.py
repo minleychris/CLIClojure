@@ -379,10 +379,6 @@ def DOT(args, __env):
         raise Exception  # TODO: implement this
 
 
-def CONS(*args):
-    return args[1].cons(args[0])
-
-
 def FIRST(*args):
     return args[0].first()
 
@@ -634,7 +630,6 @@ def create_base_ns():
              Symbol("."): DOT,
              Symbol("+"): PLUS,
              Symbol("="): EQUALS,
-             Symbol("cons"): CONS,
              Symbol("first"): FIRST,
              Symbol("rest"): REST,
              Symbol("meta"): META,
