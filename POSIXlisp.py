@@ -306,8 +306,12 @@ def DEF(args, ns):
 
 
 def FN(args, ns):
-    argz = args.first()
-    body = args.next().first()
+    if isinstance(args.first(), Vector):
+        argz = args.first()
+        body = args.next().first()
+    else:
+        argz = args.next().first()
+        body = args.next().next().first()
 
     class Func(AFunction):
         def invoke(self, *args):
