@@ -113,6 +113,9 @@ class Cons(ASeq):  # TODO: Java implements Serializable also
     def withMeta(self, meta):
         return Cons(meta, self._first, self._more)
 
+    def __str__(self):
+        return self.first().__str__() + self.next().__str__()  # TODO: better
+
 
 class PersistentList(ASeq, IReduce, Counted):  # TODO: Java implements List also
 
