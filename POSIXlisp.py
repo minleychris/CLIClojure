@@ -450,7 +450,7 @@ grammar = Grammar(
     symbol = "." / ~"[&*+=!_?\-a-zA-Z][.&*+=!_?\-a-zA-Z0-9]*"
     s_exp  = "(" whitespace* (exp whitespace*)* ")"
     vector = "[" whitespace* (exp whitespace*)* "]"
-    string = ~"\\".*\\""
+    string = ~"\\".*?\\""S
     keyword = ~":[a-z]*"
     boolean = "true" / "false"
     map = "{" whitespace* (exp whitespace exp whitespace*)* "}"
