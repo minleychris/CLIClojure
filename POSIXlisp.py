@@ -603,7 +603,7 @@ def create_base_ns():
     ns.ns = {Symbol("if"): IF,
              Symbol("quote"): QUOTE,
              Symbol("def"): DEF,
-             Symbol("fn"): FN,
+             Symbol("fn*"): FN,
              Symbol("let"): LET,
              Symbol("do"): DO,
              Symbol("ns"): NS,

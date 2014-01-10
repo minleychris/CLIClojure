@@ -46,7 +46,7 @@ class TestSpecialForms(unittest.TestCase):
         self.assertEqual(val, 44)
 
     def test_fn(self):
-        val = eval_one("((fn [a] (+ 1 a)) 2)")
+        val = eval_one("((fn* [a] (+ 1 a)) 2)")
         self.assertEqual(val.__str__(), "3")
 
     def test_let(self):
