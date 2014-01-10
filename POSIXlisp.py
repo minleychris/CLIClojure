@@ -413,6 +413,11 @@ def eval_s_exp(s_exp, ns):
 
     if is_special(func):
         return func(rest, ns)
+    elif isinstance(func, types.FunctionType):
+        if rest is None:
+            return func()
+        evaled = map(lambda r: l_eval(r, ns), rest)
+        return func(*evaled)
     else:
         if rest is None:
             return func().invoke()
