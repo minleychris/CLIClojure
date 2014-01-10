@@ -365,10 +365,15 @@ def COMMENT(args, __env):
 def DOT(args, __env):
     clazz = __env.resolveClass(args.first())
     rest = args.next()
-    if isinstance(clazz, types.TypeType):
-        if rest.count() == 1:
+    if isinstance(clazz, types.TypeType) or isinstance(clazz, types.ModuleType):
+        if rest.count() == 1 and isinstance(rest.first(), Symbol):
             member = rest.first()
             return clazz.__dict__[member._val]
+        if rest.count() == 1 and isinstance(rest.first(), PersistentList):
+            list = rest.first()
+            method = list.first()
+            argz = list.next()
+            return clazz.__dict__[method._val](*map(lambda r: l_eval(r, __env), argz))
         raise Exception  # TODO: implement this
     else:
         raise Exception  # TODO: implement this
