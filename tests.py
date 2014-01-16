@@ -41,7 +41,7 @@ class TestSpecialForms(unittest.TestCase):
     def test_def(self):
         ns = POSIXlisp.create_base_ns()
         val = eval_one("(def a 44)", ns)
-        self.assertEqual(val, POSIXlisp.Symbol("a"))
+        self.assertEqual(val, POSIXlisp.Symbol.intern("a"))
         val = eval_one("a", ns)
         self.assertEqual(val, 44)
 

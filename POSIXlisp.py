@@ -107,39 +107,57 @@ class Map(IObj):
 
 
 class Symbol(IObj):
-    def __init__(self, val, meta=None):
-        self._val = val
-        self._meta = meta
+    def __init__(self, a1, a2, a3=None):
+        if a3 is None:
+            self.ns = a1
+            self.name = a2
+            self._meta = None
+        else:
+            self._meta = a1
+            self.ns = a2
+            self.name = a3
 
     def __str__(self):
-        return self._val
+        return self.name
 
     def __lt__(self, other):
-        return isinstance(other, Symbol) and self._val.__lt__(other._val)
+        return isinstance(other, Symbol) and self.name.__lt__(other.name)
 
     def __le__(self, other):
-        return isinstance(other, Symbol) and self._val.__le__(other._val)
+        return isinstance(other, Symbol) and self.name.__le__(other.name)
 
     def __eq__(self, other):
-        return isinstance(other, Symbol) and self._val.__eq__(other._val)
+        return isinstance(other, Symbol) and self.name.__eq__(other.name)
 
     def __ne__(self, other):
-        return isinstance(other, Symbol) and self._val.__ne__(other._val)
+        return isinstance(other, Symbol) and self.name.__ne__(other.name)
 
     def __gt__(self, other):
-        return isinstance(other, Symbol) and self._val.__gt__(other._val)
+        return isinstance(other, Symbol) and self.name.__gt__(other.name)
 
     def __ge__(self, other):
-        return isinstance(other, Symbol) and self._val.__ge__(other._val)
+        return isinstance(other, Symbol) and self.name.__ge__(other.name)
 
     def __hash__(self):
-        return self._val.__hash__()
+        return self.name.__hash__()
 
     def meta(self):
         return self._meta
 
     def withMeta(self, meta):
-        return Symbol(self._val, self._meta)
+        return Symbol(self._meta, self.ns, self.name)
+
+    @classmethod
+    def intern(cls, nsname):
+        try:
+            i = nsname.index('/')
+        except ValueError:
+            i = -1
+
+        if i == -1 or nsname == "/":
+            return Symbol(None, intern(nsname))
+        else:
+            return Symbol(intern(nsname[0:i]), intern(nsname[(i + 1):]))
 
 
 class String(object):
@@ -368,12 +386,12 @@ def DOT(args, __env):
     if isinstance(clazz, types.TypeType) or isinstance(clazz, types.ModuleType):
         if rest.count() == 1 and isinstance(rest.first(), Symbol):
             member = rest.first()
-            return clazz.__dict__[member._val]
+            return clazz.__dict__[member.name]
         if rest.count() == 1 and isinstance(rest.first(), PersistentList):
-            list = rest.first()
-            method = list.first()
-            argz = list.next()
-            return clazz.__dict__[method._val](*map(lambda r: l_eval(r, __env), argz))
+            lst = rest.first()
+            method = lst.first()
+            argz = lst.next()
+            return clazz.__dict__[method.name](*map(lambda r: l_eval(r, __env), argz))
         raise Exception  # TODO: implement this
     else:
         raise Exception  # TODO: implement this
@@ -510,7 +528,7 @@ def process_tree(node):
     elif node["type"] == "number":
         return int(node["text"])
     elif node["type"] == "symbol":
-        return Symbol(node["text"])
+        return Symbol.intern(node["text"])
     elif node["type"] == "keyword":
         return Keyword(node["text"])
     elif node["type"] == "string":
@@ -618,22 +636,22 @@ def parse_eval(inp, ns):
 
 
 def create_base_ns():
-    ns = Namespace.find_or_create(Symbol("clojure.core"))
-    ns.ns = {Symbol("if"): IF,
-             Symbol("quote"): QUOTE,
-             Symbol("def"): DEF,
-             Symbol("fn*"): FN,
-             Symbol("let"): LET,
-             Symbol("do"): DO,
-             Symbol("ns"): NS,
-             Symbol("comment"): COMMENT,
-             Symbol("."): DOT,
-             Symbol("+"): PLUS,
-             Symbol("="): EQUALS,
-             Symbol("first"): FIRST,
-             Symbol("rest"): REST,
-             Symbol("meta"): META,
-             Symbol("with-meta"): WITH_META}
+    ns = Namespace.find_or_create(Symbol.intern("clojure.core"))
+    ns.ns = {Symbol.intern("if"): IF,
+             Symbol.intern("quote"): QUOTE,
+             Symbol.intern("def"): DEF,
+             Symbol.intern("fn*"): FN,
+             Symbol.intern("let"): LET,
+             Symbol.intern("do"): DO,
+             Symbol.intern("ns"): NS,
+             Symbol.intern("comment"): COMMENT,
+             Symbol.intern("."): DOT,
+             Symbol.intern("+"): PLUS,
+             Symbol.intern("="): EQUALS,
+             Symbol.intern("first"): FIRST,
+             Symbol.intern("rest"): REST,
+             Symbol.intern("meta"): META,
+             Symbol.intern("with-meta"): WITH_META}
     return ns
 
 
