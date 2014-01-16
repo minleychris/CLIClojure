@@ -295,13 +295,48 @@ class Namespace(AReference):
             return self.ns.__str__() + " => None"
         return self.ns.__str__() + " => " + self.parent.__str__()
 
+    def getMapping(self, name):
+        return self.resolve(name)
+
+    def intern(self, sym):
+        if sym.ns is not None:
+            raise Exception  # TODO: throw new IllegalArgumentException("Can't intern namespace-qualified symbol")
+
+        v = None
+        if sym in self.mappings:
+            o = self.mappings[sym]
+        else:
+            o = None
+
+        if o is None:
+            v = Var(self, sym)
+            self.mappings[sym] = v
+            o = self.mappings[sym]
+
+        if isinstance(o, Var) and o.ns == self:
+            return o
+
+        if v is not None:
+            v = Var(self, sym)
+
+        self.mappings[sym] = v
+
+        return v
+
     @classmethod
     def find_or_create(cls, name):
-        if name in cls.mappings:
-            return cls.mappings[name]
+        if cls.find(name) is not None:
+            return cls.find(name)
         ns = Namespace(name)
         cls.mappings[name] = ns
         return ns
+
+    @classmethod
+    def find(cls, name):
+        if name in cls.mappings:
+            return cls.mappings[name]
+        return None
+
 
 CURRENT_NS = None
 
