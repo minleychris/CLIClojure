@@ -7,29 +7,6 @@ from clojure.lang import *
 from parsimonious.grammar import Grammar
 
 
-class IReference(IMeta):
-    def alterMeta(self, alterFn, args):
-        pass
-
-    def resetMeta(self, m):
-        pass
-
-
-class AReference(IReference):
-    def __init__(self, meta=None):
-        self._meta = meta
-
-    def meta(self):
-        return self._meta
-
-    def alterMeta(self, alterFn, args):
-# TODO: This isn't implemented yet...        self._meta = alterFn.applyTo(Cons(self._meta, args))
-        return self._meta
-
-    def resetMeta(self, m):
-        self._meta = m
-
-
 class Vector(ASeq):
     def __init__(self, data=None, meta=None):
         ASeq.__init__(self, meta)
@@ -336,6 +313,41 @@ class Namespace(AReference):
         if name in cls.mappings:
             return cls.mappings[name]
         return None
+
+
+class Var(ARef, IFn, IRef, Settable):
+    macroKey = Keyword.intern(None, "macro")
+    nameKey = Keyword.intern(None, "name")
+    nsKey = Keyword.intern(None, "ns")
+    rev = 0
+
+    def __init__(self, ns, sym, root=None):
+        ARef.__init__(self, None)
+        self.ns = ns
+        self.sym = sym
+        # self.threadBound = AtomicBoolean(false)
+        # self.root = Unbound(this)
+        # self.setMeta(PersistentHashMap.EMPTY)
+        self.threadBound = False
+        self.root = None
+        self.setMeta({})
+
+        if root is not None:
+            self.root = root
+            self.rev += 1
+
+    def setMeta(self, m):
+        # ensure these basis keys
+        # TODO: resetMeta(m.assoc(nameKey, sym).assoc(nsKey, ns))
+        m[self.nameKey] = self.sym
+        m[self.nsKey] = self.ns
+        self.resetMeta(m)
+
+    def isMacro(self):
+        if self.macroKey in self.meta():
+            return self.meta()[self.macroKey]
+        else:
+            return False
 
 
 CURRENT_NS = None
