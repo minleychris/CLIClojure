@@ -28,6 +28,9 @@ class Counted(object):
     def count(self):
         pass
 
+    def __len__(self):
+        return self.count()
+
 
 class IPersistentCollection(Seqable):
     def count(self):
