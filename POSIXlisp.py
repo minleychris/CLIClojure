@@ -217,6 +217,10 @@ class Keyword(object):
     def __hash__(self):
         return self._val.__hash__()
 
+    @classmethod
+    def intern(self, ns, val):
+        return Keyword(val)
+
 
 class Boolean(object):
     def __init__(self, val):
