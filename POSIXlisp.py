@@ -322,6 +322,7 @@ class Var(ARef, IFn, IRef, Settable):
     macroKey = Keyword.intern(None, "macro")
     nameKey = Keyword.intern(None, "name")
     nsKey = Keyword.intern(None, "ns")
+    privateKey = Keyword.intern(None, "private")
     rev = 0
 
     def __init__(self, ns, sym, root=None):
@@ -353,9 +354,33 @@ class Var(ARef, IFn, IRef, Settable):
             return False
 
         if self.macroKey in self.meta():
-            return self.meta()[self.macroKey]
+            return self.meta().get(self.macroKey)
         else:
             return False
+
+    def isPublic(self):
+        return not self.meta()[self.privateKey]
+
+    def get(self):
+        # if(!threadBound.get()) TODO
+        #     return root;
+        # return deref();
+        return self.root
+
+    def set(self, val):  # TODO
+        self.root = val
+        return self.root
+
+    def invoke(self, *args):
+        return self.root().invoke(*args)
+
+    def applyTo(self, arglist):
+        r = self.invoke(*arglist)
+        return r
+
+    @classmethod
+    def create(cls, root):
+        return Var(None, None, root)
 
 
 CURRENT_NS = None
