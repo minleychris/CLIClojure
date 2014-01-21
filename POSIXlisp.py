@@ -723,6 +723,8 @@ def parse_eval(inp, ns):
 
 
 def create_base_ns():
+    global CURRENT_NS
+
     ns = Namespace.find_or_create(Symbol.intern("clojure.core"))
     ns.ns = {Symbol.intern("if"): IF,
              Symbol.intern("quote"): QUOTE,
@@ -732,19 +734,30 @@ def create_base_ns():
              Symbol.intern("do"): DO,
              Symbol.intern("ns"): NS,
              Symbol.intern("comment"): COMMENT,
-             Symbol.intern("."): DOT,
-             Symbol.intern("+"): PLUS,
-             Symbol.intern("="): EQUALS,
-             Symbol.intern("first"): FIRST,
-             Symbol.intern("rest"): REST,
-             Symbol.intern("meta"): META,
-             Symbol.intern("with-meta"): WITH_META}
+             Symbol.intern("."): DOT}
+
+    ns.intern(Symbol.intern("+")).set(PLUS)
+    ns.intern(Symbol.intern("=")).set(EQUALS)
+    ns.intern(Symbol.intern("first")).set(FIRST)
+    ns.intern(Symbol.intern("rest")).set(REST)
+    ns.intern(Symbol.intern("meta")).set(META)
+    ns.intern(Symbol.intern("with-meta")).set(WITH_META)
+
+    CURRENT_NS = ns
+
+    f = open('core.clj', 'r')
+    f_string = f.read()
+    evaled = parse_eval(f_string, ns)
+
+    #TODO: debug
+    for val in evaled:
+        if val is not None:
+            print val
     return ns
 
 
 def main():
-    global CURRENT_NS
-    CURRENT_NS = create_base_ns()
+    create_base_ns()
 
     while True:
         line = raw_input(str(CURRENT_NS.name) + "=> ")
