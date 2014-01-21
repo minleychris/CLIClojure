@@ -243,9 +243,6 @@ class Namespace(AReference):
         self.parent = parent
         self.ns = {}
 
-    def assign(self, name, value):
-        self.ns[name] = value
-
     def resolve(self, name):
         if name in self.ns:
             return self.ns[name]
@@ -381,7 +378,7 @@ def DEF(args, ns):
         value = l_eval(args.next().first(), ns)
     else:
         value = None
-    ns.assign(name, value)
+    ns.intern(name).set(value)
     return name
 
 
@@ -398,7 +395,10 @@ def FN(args, ns):
             new_ns = Namespace("temp", ns)
             i = 0
             for arg in argz:
-                new_ns.assign(arg, args[i])
+                if arg.name == "&":
+                    new_ns.intern(argz[i+1]).set(PersistentList.create(args[i:]))
+                    break
+                new_ns.intern(arg).set(args[i])
                 i += 1
 
             return l_eval(body, new_ns)
@@ -417,7 +417,7 @@ def LET(args, ns):
     for i in range(0, len(argz)/2):
         name = argz[i*2]
         val = l_eval(argz[(i*2)+1], new_ns)
-        new_ns.assign(name, val)
+        new_ns.intern(name).set(val)
 
     return l_eval(body, new_ns)
 
