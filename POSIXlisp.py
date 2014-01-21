@@ -411,7 +411,7 @@ def FN(args, ns):
     if isinstance(args.first(), Vector):
         argz = args.first()
         body = args.next().first()
-    else:
+    elif isinstance(args.first(), Symbol):
         argz = args.next().first()
         body = args.next().next().first()
 
@@ -517,6 +517,12 @@ def is_special(func):
     return func in [IF, QUOTE, DEF, FN, LET, DO, NS, COMMENT, DOT]
 
 
+def isSpecial(op):
+    if not isinstance(op, Symbol):
+        return False
+    return op.name in ["if", "quote", "def", "fn*", "let*", "do", "ns", "comment", "."]
+
+
 def eval_s_exp(s_exp, ns):
     rest = s_exp.next()
     func = l_eval(s_exp.first(), ns)
@@ -545,6 +551,8 @@ def l_eval(exp, ns):
     if isinstance(exp, Nil):
         return exp
     if isinstance(exp, Symbol):
+        if not isSpecial(exp):
+            return l_eval(ns.resolve(exp), ns)
         return ns.resolve(exp)
     if isinstance(exp, Keyword):
         return exp
@@ -554,6 +562,8 @@ def l_eval(exp, ns):
         return exp
     if isinstance(exp, Map):
         return exp
+    if isinstance(exp, Var):
+        return exp.get()
 
 
 grammar = Grammar(
