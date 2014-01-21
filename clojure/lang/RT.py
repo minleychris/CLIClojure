@@ -26,6 +26,7 @@ def seqFrom(coll):
     #     return seq(((Map) coll).entrySet());
     else:
         # TODO: Throw better error
+        print(type(coll))
         raise Exception
         # Class c = coll.getClass();
         # Class sc = c.getSuperclass();
