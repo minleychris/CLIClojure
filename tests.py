@@ -50,9 +50,9 @@ class TestSpecialForms(unittest.TestCase):
         self.assertEqual(val.__str__(), "3")
 
     def test_let(self):
-        val = eval_one("(let [a 1] (+ a 1))")
+        val = eval_one("(let* [a 1] (+ a 1))")
         self.assertEqual(val.__str__(), "2")
-        val = eval_one("(let [a 1 b (+ a 1)] (+ b 1))")
+        val = eval_one("(let* [a 1 b (+ a 1)] (+ b 1))")
         self.assertEqual(val.__str__(), "3")
 
     def test_do(self):

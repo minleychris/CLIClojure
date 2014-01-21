@@ -700,7 +700,7 @@ def create_base_ns():
              Symbol.intern("quote"): QUOTE,
              Symbol.intern("def"): DEF,
              Symbol.intern("fn*"): FN,
-             Symbol.intern("let"): LET,
+             Symbol.intern("let*"): LET,
              Symbol.intern("do"): DO,
              Symbol.intern("ns"): NS,
              Symbol.intern("comment"): COMMENT,
