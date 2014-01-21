@@ -76,6 +76,9 @@ class Map(IObj):
         ret += "}"
         return ret
 
+    def __iter__(self):
+        return self._data.__iter__()
+
     def meta(self):
         return self._meta
 
@@ -122,7 +125,7 @@ class Symbol(IObj):
         return self._meta
 
     def withMeta(self, meta):
-        return Symbol(self._meta, self.ns, self.name)
+        return Symbol(meta, self.ns, self.name)
 
     @classmethod
     def intern(cls, nsname):
@@ -195,7 +198,7 @@ class Keyword(object):
         return self._val.__hash__()
 
     @classmethod
-    def intern(self, ns, val):
+    def intern(cls, ns, val):
         return Keyword(val)
 
 
@@ -330,7 +333,7 @@ class Var(ARef, IFn, IRef, Settable):
         # self.setMeta(PersistentHashMap.EMPTY)
         self.threadBound = False
         self.root = None
-        self.setMeta({})
+        self.setMeta(Map())
 
         if root is not None:
             self.root = root
@@ -338,12 +341,17 @@ class Var(ARef, IFn, IRef, Settable):
 
     def setMeta(self, m):
         # ensure these basis keys
-        # TODO: resetMeta(m.assoc(nameKey, sym).assoc(nsKey, ns))
-        m[self.nameKey] = self.sym
-        m[self.nsKey] = self.ns
-        self.resetMeta(m)
+        # TODO: Should never be null?
+        if m is None:
+            m = Map()
+
+        self.resetMeta(m.assoc(self.nameKey, self.sym).assoc(self.nsKey, self.ns))
 
     def isMacro(self):
+        # TODO: Should never be null?
+        if self.meta() is None:
+            return False
+
         if self.macroKey in self.meta():
             return self.meta()[self.macroKey]
         else:
