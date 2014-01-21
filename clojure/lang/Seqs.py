@@ -82,6 +82,24 @@ class ASeq(Obj, ISeq, Sequential, IHashEq):  # Note: Java version implements jav
             return PersistentList.EMPTY
         return s
 
+    def __len__(self):
+        return self.count()
+
+    def __iter__(self):
+        class SeqIterator:
+            def __init__(self, seq):
+                self.seq = seq
+
+            def next(self):
+                if self.seq is None:
+                    raise StopIteration
+                head = self.seq.first()
+                self.seq = self.seq.next()
+                return head
+
+        return SeqIterator(self)
+
+
 
 class Cons(ASeq):  # TODO: Java implements Serializable also
 
