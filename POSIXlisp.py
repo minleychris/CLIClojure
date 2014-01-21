@@ -283,15 +283,15 @@ class Namespace(AReference):
             raise Exception  # TODO: throw new IllegalArgumentException("Can't intern namespace-qualified symbol")
 
         v = None
-        if sym in self.mappings:
-            o = self.mappings[sym]
+        if sym in self.ns:
+            o = self.ns[sym]
         else:
             o = None
 
         if o is None:
             v = Var(self, sym)
-            self.mappings[sym] = v
-            o = self.mappings[sym]
+            self.ns[sym] = v
+            o = self.ns[sym]
 
         if isinstance(o, Var) and o.ns == self:
             return o
@@ -299,7 +299,7 @@ class Namespace(AReference):
         if v is not None:
             v = Var(self, sym)
 
-        self.mappings[sym] = v
+        self.ns[sym] = v
 
         return v
 
