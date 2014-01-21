@@ -90,19 +90,6 @@ class TestFunctions(unittest.TestCase):
         val = eval_one("(= 1 2)")
         self.assertEqual(val, False)
 
-    def test_cons(self):
-        val = eval_one("(cons 1 (quote (2 3)))")
-        self.assertEqual(val.first(), 1)
-        self.assertEqual(val.next().first(), 2)
-        self.assertEqual(val.next().next().first(), 3)
-        self.assertTrue(is_seq(val))
-
-        val = eval_one("(cons 1 [2 3])")
-        self.assertEqual(val.first(), 1)
-        self.assertEqual(val.next().first(), 2)
-        self.assertEqual(val.next().next().first(), 3)
-        self.assertTrue(is_seq(val))
-
     def test_first(self):
         val = eval_one("(first (quote (1 2 3)))")
         self.assertEqual(val, 1)
@@ -199,6 +186,32 @@ class TestReaderMacros(unittest.TestCase):
 
         val = eval_one("(meta ^\"test\" [1 2 3])")
         self.assertEqual(val.__str__(), "{:tag \"test\"}")
+
+
+class TestClojureDefinedFunctions(unittest.TestCase):
+
+    def test_list(self):
+        val = eval_one("(list 1 2 3)")
+        self.assertEqual(val.__str__(), "(1 2 3)")
+
+    def test_cons(self):
+        val = eval_one("(cons 1 (quote (2 3)))")
+        self.assertEqual(val.first(), 1)
+        self.assertEqual(val.next().first(), 2)
+        self.assertEqual(val.next().next().first(), 3)
+        self.assertTrue(is_seq(val))
+
+        val = eval_one("(cons 1 [2 3])")
+        self.assertEqual(val.first(), 1)
+        self.assertEqual(val.next().first(), 2)
+        self.assertEqual(val.next().next().first(), 3)
+        self.assertTrue(is_seq(val))
+
+    def test_let(self):
+        val = eval_one("(let [a 1] (+ a 1))")
+        self.assertEqual(val.__str__(), "2")
+        val = eval_one("(let [a 1 b (+ a 1)] (+ b 1))")
+        self.assertEqual(val.__str__(), "3")
 
 
 if __name__ == '__main__':
