@@ -171,7 +171,10 @@ class String(object):
 
 class Keyword(object):
     def __init__(self, val):
-        self._val = val[1:]
+        if val[0:1] == ":":
+            self._val = val[1:]
+        else:
+            self._val = val
 
     def __str__(self):
         return ":" + self._val
