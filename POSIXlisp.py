@@ -384,6 +384,11 @@ class Var(ARef, IFn, IRef, Settable):
 
 
 CURRENT_NS = None
+LOCAL_ENV = Var.create(None)
+
+
+def currentNS():
+    return CURRENT_NS
 
 
 def IF(args, ns):
@@ -398,6 +403,54 @@ def QUOTE(args, ns):
 
 
 def DEF(args, ns):
+    # (def x) or (def x initexpr) or (def x "docstring" initexpr)
+    docstring = None
+
+    if len(args) == 3 and isinstance(second(args), String):
+        docstring = second(args)
+        args = PersistentList.create([first(args), third(args)])
+
+    if len(args) > 2:
+        raise Exception  # TODO: Util.runtimeException("Too many arguments to def");
+    elif len(args) < 1:
+        raise Exception  # TODO: Util.runtimeException("Too few arguments to def");
+    elif not isinstance(first(args), Symbol):
+        raise Exception  # TODO: Util.runtimeException("First argument to def must be a Symbol");
+    sym = first(args)
+    v = lookupVar(sym, True)
+    if v is None:
+        raise Exception  # Util.runtimeException("Can't refer to qualified var that doesn't exist");
+    if not v.ns == currentNS():
+        if sym.ns is None:
+            v = currentNS().intern(sym)
+        else:
+            raise Exception  # throw Util.runtimeException("Can't create defs outside of current ns")
+    mm = sym.meta()
+    # isDynamic = booleanCast(get(mm, dynamicKey))       TODO: Dynamic vars
+    # if isDynamic:
+    #     v.setDynamic()
+    # if(!isDynamic && sym.name.startsWith("*") && sym.name.endsWith("*") && sym.name.length() > 2)
+    # {
+    #     RT.errPrintWriter().format("Warning: %1$s not declared dynamic and thus is not dynamically rebindable, "
+    #                                +"but its name suggests otherwise. Please either indicate ^:dynamic %1$s or change the name. (%2$s:%3$d)\n",
+    #                                sym, SOURCE_PATH.get(), LINE.get());
+    # }
+    # if booleanCast(get(mm, arglistsKey)):
+    #     vm = v.meta()
+    #     #drop quote
+    #     vm = RT.assoc(vm, arglistsKey, second(mm.valAt(arglistsKey)))
+    #     v.setMeta(vm)
+    # source_path = SOURCE_PATH.get()       TODO: line numbers etc
+    # source_path = source_path == null ? "NO_SOURCE_FILE" : source_path;
+    # mm = (IPersistentMap) RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.COLUMN_KEY, COLUMN.get()).assoc(RT.FILE_KEY, source_path);
+
+    if docstring is not None:
+        mm = assoc(mm, DOC_KEY, docstring)
+    # mm = elideMeta(mm)
+    # meta = mm.count()==0 ? null:analyze(context == C.EVAL ? context : C.EXPRESSION, mm);
+
+    v.setMeta(mm)
+
     name = args.first()
     if args.next() is not None:
         value = l_eval(args.next().first(), ns)
@@ -405,6 +458,85 @@ def DEF(args, ns):
         value = None
     ns.intern(name).set(value)
     return name
+
+
+def first(l):
+    return l.first()
+
+
+def second(l):
+    return l.rest.first()
+
+
+def third(l):
+    return l.rest.rest.first()
+
+
+def lookupVar(sym, internNew, registerMacro=True):
+    var = None
+
+    # note - ns-qualified vars in other namespaces must already exist
+    if sym.ns is not None:
+        ns = namespaceFor(sym)
+        if ns is None:
+            return None
+        name = Symbol.intern(sym.name)
+        if internNew and ns == currentNS():
+            var = currentNS().intern(name)
+        else:
+            var = ns.findInternedVar(name)
+    # elif sym.equals(NS):      TODO: Deal with at some time
+    #     var = RT.NS_VAR
+    # elif sym.equals(IN_NS):
+    #     var = RT.IN_NS_VAR
+    else:
+        # is it mapped?
+        o = currentNS().getMapping(sym)
+        if o is None:
+            # introduce a new var in the current ns
+            if internNew:
+                var = currentNS().intern(Symbol.intern(sym.name))
+        elif isinstance(o, Var):
+            var = o
+        else:
+            raise Exception("Expecting var, but " + str(sym) + " is mapped to " + str(o))  # TODO: Util.runtimeException("Expecting var, but " + sym + " is mapped to " + o)
+
+    if var is not None and (not var.isMacro() or registerMacro):
+        registerVar(var)
+    return var
+
+varsMap = {}
+
+
+def registerVar(var):
+    # if not VARS.isBound():   TODO: Make this better
+    #     return
+    # varsMap = VARS.deref()
+    # id = RT.get(varsMap, var)
+    # if id is None:
+    #     VARS.set(RT.assoc(varsMap, var, registerConstant(var)))
+
+    if varsMap is not None and (var not in varsMap or varsMap[var] is None):
+        varsMap[var] = var
+
+
+def namespaceFor(a1, a2=None):
+
+    if a2 is None:
+        inns = currentNS()
+        sym = a1
+    else:
+        inns = a1
+        sym = a2
+
+    # note, presumes non-nil sym.ns
+    # first check against currentNS' aliases...
+    nsSym = Symbol.intern(sym.ns)
+    ns = inns.lookupAlias(nsSym)
+    if ns is None:
+        # ...otherwise check the Namespaces map.
+        ns = Namespace.find(nsSym)
+    return ns
 
 
 def FN(args, ns):
@@ -522,6 +654,51 @@ def isSpecial(op):
         return False
     return op.name in ["if", "quote", "def", "fn*", "let*", "do", "ns", "comment", "."]
 
+# Stuff from RT
+
+
+def booleanCast(x):
+    if isinstance(x, types.BooleanType):
+        return x
+    if isinstance(x, Boolean):
+        return x._val
+    return x is not None
+
+
+def get(coll, key):
+    # if isinstance(coll, ILookup):   TODO
+    #     return coll.valAt(key);
+    return getFrom(coll, key)
+
+
+def getFrom(coll, key):
+    if coll is None:
+        return None
+    elif isinstance(coll, Map):
+        return coll.get(key)
+    # else if(coll instanceof IPersistentSet) {  TODO
+    #     IPersistentSet set = (IPersistentSet) coll;
+    #     return set.get(key);
+    # }
+    elif isinstance(key, types.IntType) and (isinstance(coll, String) or isinstance(coll, types.StringType) or isinstance(coll, types.ListType)):
+        if key >= 0 and key < len(coll):
+            return coll[key]
+        return None
+
+    return None
+
+
+def assoc(coll, key, val):
+    if coll is None:
+        #return PersistentArrayMap(new Object[]{key, val}) TODO
+        return Map({key: val})
+    return coll.assoc(key, val)
+
+
+DOC_KEY = Keyword.intern(None, "doc")
+
+# / Stuff from RT
+
 
 def eval_s_exp(s_exp, ns):
     rest = s_exp.next()
@@ -557,13 +734,103 @@ def l_eval(exp, ns):
     if isinstance(exp, Keyword):
         return exp
     if isinstance(exp, PersistentList):
-        return eval_s_exp(exp, ns)
+        return eval_s_exp(macroexpand(exp), ns)
     if isinstance(exp, Vector):
         return exp
     if isinstance(exp, Map):
         return exp
     if isinstance(exp, Var):
         return exp.get()
+
+
+def macroexpand1(x):
+    if isinstance(x, ISeq):
+        form = x
+        op = first(form)
+        if isSpecial(op):
+            return x
+
+        # macro expansion
+        v = isMacro(op)
+        if v is not None:
+            # try
+            # {
+            return v.applyTo(RT.cons(form, RT.cons(LOCAL_ENV.get(),form.next())))
+            # }
+            # catch(ArityException e)    TODO
+            # {
+            # // hide the 2 extra params for a macro
+            # throw new ArityException(e.actual - 2, e.name);
+            # }
+        else:
+            if isinstance(op, Symbol):
+                sym = op
+                sname = sym.name
+                # (.substring s 2 5) => (. s substring 2 5)
+                if sym.name[0] == '.':
+                    raise Exception  # TOD: implement
+                    # if length(form) < 2:
+                    #     # throw new IllegalArgumentException("Malformed member expression, expecting (.member target ...)");  TODO
+                    #     raise Exception
+                    # meth = Symbol.intern(sname.substring(1))
+                    # target = second(form)
+                    # if HostExpr.maybeClass(target, False) is not None:
+                    #     target = RT.list(IDENTITY, target).withMeta(RT.map(RT.TAG_KEY,CLASS))
+                    # return preserveTag(form, RT.listStar(DOT, target, meth, form.next().next()))
+                elif namesStaticMember(sym):
+                    raise Exception  # TOD: implement
+                    # target = Symbol.intern(sym.ns);
+                    # c = HostExpr.maybeClass(target, False)
+                    # if c is not None:
+                    #     meth = Symbol.intern(sym.name);
+                    #     return preserveTag(form, RT.listStar(DOT, target, meth, form.next()))
+                else:
+                    # (s.substring 2 5) => (. s substring 2 5)
+                    # also (package.class.name ...) (. package.class name ...)
+                    if sname[-1:] == ".":
+                        raise Exception  # TOD: implement
+                        # return RT.listStar(NEW, Symbol.intern(sname.substring(0, idx)), form.next())
+    return x
+
+
+def macroexpand(form):
+    exf = macroexpand1(form)
+    if exf != form:
+        return macroexpand(exf)
+    return form
+
+
+def namesStaticMember(sym):
+    return sym.ns is not None and namespaceFor(sym) is None
+
+
+def isMacro(op):
+    # no local macros for now
+    if isinstance(op, Symbol) and referenceLocal(op) is not None:
+        return None
+
+    if isinstance(op, Symbol) or isinstance(op, Var):
+        if isinstance(op, Var):
+            v = op
+        else:
+            v = lookupVar(op, False, False)
+        if v is not None and v.isMacro():
+            if v.ns != currentNS() and not v.isPublic():
+                # throw new IllegalStateException("var: " + v + " is not public") TODO
+                raise Exception
+            return v
+    return None
+
+
+def referenceLocal(sym):
+    # if not LOCAL_ENV.isBound():
+    #     return None
+    # b = RT.get(LOCAL_ENV.deref(), sym)
+    # if b is not None:
+    #     method = METHOD.deref()
+    #     closeOver(b, method)
+    # return b
+    return None
 
 
 grammar = Grammar(
