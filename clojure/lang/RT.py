@@ -1,5 +1,6 @@
 from interfaces import *
 from Seqs import *
+from not_finished import *
 
 
 ##
@@ -46,6 +47,7 @@ def count(o):
         return o.count()
     return countFrom(Util.ret1(o, o is None))
 
+
 def countFrom(o):
     if o is None:
         return 0
@@ -72,6 +74,7 @@ def countFrom(o):
     raise Exception
     # throw new UnsupportedOperationException("count not supported on this type: " + o.getClass().getSimpleName());
 
+
 def cons(x, coll):
     if coll is None:
         return PersistentList(x)
@@ -79,3 +82,44 @@ def cons(x, coll):
         return Cons(x, coll)
     else:
         return Cons(x, seq(coll))
+
+
+def booleanCast(x):
+    if isinstance(x, types.BooleanType):
+        return x
+    if isinstance(x, Boolean):
+        return x._val
+    return x is not None
+
+
+def get(coll, key):
+    # if isinstance(coll, ILookup):   TODO
+    #     return coll.valAt(key);
+    return getFrom(coll, key)
+
+
+def getFrom(coll, key):
+    if coll is None:
+        return None
+    elif isinstance(coll, Map):
+        return coll.get(key)
+    # else if(coll instanceof IPersistentSet) {  TODO
+    #     IPersistentSet set = (IPersistentSet) coll;
+    #     return set.get(key);
+    # }
+    elif isinstance(key, types.IntType) and (isinstance(coll, String) or isinstance(coll, types.StringType) or isinstance(coll, types.ListType)):
+        if key >= 0 and key < len(coll):
+            return coll[key]
+        return None
+
+    return None
+
+
+def assoc(coll, key, val):
+    if coll is None:
+        #return PersistentArrayMap(new Object[]{key, val}) TODO
+        return Map({key: val})
+    return coll.assoc(key, val)
+
+
+DOC_KEY = Keyword.intern(None, "doc")
