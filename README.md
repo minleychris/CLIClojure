@@ -17,7 +17,9 @@ The functional aims for this project are:
   
 Currently this project is NOT suitable for production and quite likely never will be, but I'm having fun writing it so
 far.  At some point I have to decide if this is a viable project in its own right to push to completion, but for now I'm
-really enjoying achieving the personal aims so it's useful to me even if its not to anyone else.
+really enjoying achieving the personal aims so it's useful to me even if its not to anyone else.  Also, clojurePOSIX is
+a working title and might be subject to change in the future, if I can think of something better or things change or
+whatever.
 
 
 Approach
