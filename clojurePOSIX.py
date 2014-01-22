@@ -13,6 +13,13 @@ from parsimonious.grammar import Grammar
 # datastructures that are not right and need thinking about better.  Its a bit big but things will be moved from here
 # when they are finished enough.  Ideas in here come from the JVM Clojure classes LispReader, Compiler and RT.
 #
+# TODO:
+#   The String, Boolean and Nil objects are not right and I need to get rid of them.
+#   Some of the special forms are not so special and should be got rid of
+#   The functions that are implemented in here should be got rid of
+#   Registering the special forms is not right, also the is_special and isSpecial functions
+#   Need to add the remaining special forms from Compiler.java
+#
 ##
 
 
