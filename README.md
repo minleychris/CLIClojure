@@ -60,3 +60,16 @@ key - otherwise why not just use JVM Clojure.  Things I wish to investigate for 
   * Investigating PyPi vs interpretted Python as the runtime
 
 And I'm sure there are a wide variety of other problems to keep me on my toes!
+
+
+To Run
+========
+
+You need to install the Python module parsimonious using a command something like:
+
+    sudo easy_install parsimonious
+
+Then to run it just clone and then from within the directory type:
+
+    clojurePOSIX.py
+
