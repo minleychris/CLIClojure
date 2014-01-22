@@ -1,3 +1,14 @@
+##
+#
+# Namespace containing a load of the higher level interfaces based on the JVM Clojure clojure.lang namespace.
+#
+# TODO:
+#   Make use of the Python abstract base class stuff to represent these Java Interfaces and Abstracts better
+#   Work out about interop with Python vs the Java interop present in the JVM Clojure versions of these
+#
+##
+
+
 class IMeta(object):
     def meta(self):
         pass

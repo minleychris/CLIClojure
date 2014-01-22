@@ -3,6 +3,13 @@ import Util
 from interfaces import *
 
 
+##
+#
+# Namespace containing some of the Seq datastructures from the JVM Clojure clojure.lang package
+#
+##
+
+
 class ASeq(Obj, ISeq, Sequential, IHashEq):  # Note: Java version implements java.util.List & java.io.Serializable also
     def __init__(self, meta=None):
         Obj.__init__(self, meta)

@@ -1,6 +1,13 @@
 from interfaces import *
 
 
+##
+#
+# Namespace containing some of the funcitons from the JVM Clojure Util class
+#
+##
+
+
 def equiv(k1, k2):  # TODO: Improve
     if k1 == k2:
         return True

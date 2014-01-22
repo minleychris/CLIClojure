@@ -2,6 +2,13 @@ from interfaces import *
 from Seqs import *
 
 
+##
+#
+# Namespace containing some of the funcitons from the JVM Clojure RT class
+#
+##
+
+
 def seq(coll):
     if isinstance(coll, ASeq):
         return coll

@@ -7,6 +7,15 @@ from clojure.lang import *
 from parsimonious.grammar import Grammar
 
 
+##
+#
+# This is the main file for the clojurePOSIX project.  This contains the parser and runtime interaction stuff along with
+# datastructures that are not yet finished and functions that have not yet found there final home.  Its a bit big but
+# things will be removed from here when they are finished enough
+#
+##
+
+
 class Vector(ASeq):
     def __init__(self, data=None, meta=None):
         ASeq.__init__(self, meta)
