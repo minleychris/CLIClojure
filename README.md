@@ -57,7 +57,7 @@ key - otherwise why not just use JVM Clojure.  Things I wish to investigate for 
   * Building a more efficient parser (possibly in C)
   * JIT interpretting of forms - only reading top level forms until they are accessed
   * Producing a "compiled" version of the libraries so that the clojure.core does not need to be read every time
-  * Investigating PyPi vs interpretted Python as the runtime
+  * Investigating PyPy JIT vs standard interpretted Python as the runtime
 
 And I'm sure there are a wide variety of other problems to keep me on my toes!
 
