@@ -4,7 +4,7 @@ CLIClojure
 CLIClojure is an investigation into making a Clojure dialect that is useful for unix scripting.  An example of the usage
 aimed for in CLIClojure would be to execute the following:
 
-    #!/bin/clic
+    #!/usr/bin/clic
 
     ; CLIClojure script to change permissions of some files
 
@@ -20,7 +20,7 @@ Which would change the permissions of the files in the /tmp/files directory.  No
 executable and use the shebang (#!) to run itself.  Also note the os namespace that is imported to work with standard
 operating system concepts (in this case ls and chmod).  A more advanced script would be:
 
-    #!/bin/clic
+    #!/usr/bin/clic
 
     ; CLIClojure script to resize a bunch of jpgs
 
@@ -45,8 +45,8 @@ The functional aims for this project are:
   * Create good two-way communication with the underlying OS for scripting
   
 Currently this project is NOT suitable for production and is still experimental - can this project achieve these aims
-and is the usecase for this strong enough.  That said, the roadmap is to have something that is usable in some minor
-cases very soon.
+and is the usecase for this strong enough.  That said, the roadmap is to have something that is usable in a restricted
+set of cases very soon.
 
 
 Approach
@@ -54,9 +54,9 @@ Approach
 
 The project is being built in Python for several reasons, firstly Python has excellent Object Oriented capabilities that
 will really help to reproduce the OO Java datastructures used extensively in Clojure.  In addition developing in a
-higher level language with first class functions is a good fit for a Clojure interpreter, Python provides good
-interoperability with C so if/when speed optimisations are needed C can be brought in to help, Python is pre-installed
-on many modern systems and finally Python has an excellent library ecosystem to build upon.
+higher level language with first class functions is a good fit for a Clojure interpreter.  Python also provides good
+interoperability with C so if/when speed optimisations are needed C can be brought in to help.  Finally, it has an
+excellent library ecosystem to build upon.
 
 To achieve the functional goals, the development is currently focusing on the following:
 
