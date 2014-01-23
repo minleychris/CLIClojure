@@ -1,10 +1,10 @@
 import unittest
-import clojurePOSIX
+import CLIClojure
 import clojure.lang
 
 
 def is_vector(form):
-    return isinstance(form, clojurePOSIX.Vector)
+    return isinstance(form, CLIClojure.Vector)
 
 
 def is_seq(form):
@@ -17,8 +17,8 @@ def eval_one(s, ns=None):
 
 def eval_all(s, ns=None):
     if ns is None:
-        ns = clojurePOSIX.create_base_ns()
-    return clojurePOSIX.parse_eval(s, ns)
+        ns = CLIClojure.create_base_ns()
+    return CLIClojure.parse_eval(s, ns)
 
 
 class TestSpecialForms(unittest.TestCase):
@@ -39,9 +39,9 @@ class TestSpecialForms(unittest.TestCase):
         self.assertTrue(is_vector(val))
 
     def test_def(self):
-        ns = clojurePOSIX.create_base_ns()
+        ns = CLIClojure.create_base_ns()
         val = eval_one("(def a 44)", ns)
-        self.assertEqual(val, clojurePOSIX.Symbol.intern("a"))
+        self.assertEqual(val, CLIClojure.Symbol.intern("a"))
         val = eval_one("a", ns)
         self.assertEqual(val, 44)
 
@@ -56,14 +56,14 @@ class TestSpecialForms(unittest.TestCase):
         self.assertEqual(val.__str__(), "3")
 
     def test_do(self):
-        ns = clojurePOSIX.create_base_ns()
+        ns = CLIClojure.create_base_ns()
         val = eval_one("(do (def a 44) 4)", ns)
         self.assertEqual(val, 4)
         val = eval_one("a", ns)
         self.assertEqual(val, 44)
 
     def test_ns(self):
-        ns = clojurePOSIX.create_base_ns()
+        ns = CLIClojure.create_base_ns()
         val = eval_one("(ns clojure.core)", ns)
         val = eval_one("(+ 1 1)", val)
         self.assertEqual(val, 2)
@@ -73,7 +73,7 @@ class TestSpecialForms(unittest.TestCase):
         self.assertEqual(val, None)  # TODO: Should be exception
 
     def test_comment(self):
-        ns = clojurePOSIX.create_base_ns()
+        ns = CLIClojure.create_base_ns()
         val = eval_one("(comment test)", ns)
         self.assertEqual(val.__str__(), "nil")
 
@@ -126,22 +126,22 @@ class TestDataStructures(unittest.TestCase):
 
     def test_string(self):
         val = eval_one("\"string\"")
-        self.assertEqual(val, clojurePOSIX.String("string"))
+        self.assertEqual(val, CLIClojure.String("string"))
 
     def test_keyword(self):
         val = eval_one(":keyword")
-        self.assertEqual(val, clojurePOSIX.Keyword(":keyword"))
+        self.assertEqual(val, CLIClojure.Keyword(":keyword"))
 
     def test_boolean(self):
         val = eval_one("true")
-        self.assertEqual(val, clojurePOSIX.Boolean("true"))
+        self.assertEqual(val, CLIClojure.Boolean("true"))
 
         val = eval_one("false")
-        self.assertEqual(val, clojurePOSIX.Boolean("false"))
+        self.assertEqual(val, CLIClojure.Boolean("false"))
 
     def test_nil(self):
         val = eval_one("nil")
-        self.assertEqual(val, clojurePOSIX.Nil())
+        self.assertEqual(val, CLIClojure.Nil())
 
     def test_map(self):
         val = eval_one("{:a 1}")
