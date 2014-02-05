@@ -190,6 +190,7 @@ class Namespace(AReference):
         self.name = name
         self.parent = parent
         self.ns = {}
+        self.python_ns = {}
 
     def resolve(self, name):
         if name in self.ns:
@@ -201,15 +202,27 @@ class Namespace(AReference):
         return None
 
     def resolveClass(self, name, mod=None):
+        if name is None and mod is not None:
+            return mod
+
         parts = str(name).split('.', 1)
         if len(parts) == 0:
             return None
-        if len(parts) == 1:
+        if len(parts) == 1 and mod is not None:
             return mod.__dict__[name]
 
         if mod is None:
-            top_level, rest = parts
-            mod = sys.modules[top_level]
+            # top_level, rest = parts
+            top_level = parts[0]
+            rest = None
+            if len(parts) > 1:
+                rest = parts[1]
+            if top_level in sys.modules:
+                mod = sys.modules[top_level]
+            elif top_level in self.python_ns:
+                mod = self.python_ns[top_level]
+            else:
+                raise Exception  # TODO: Better exception
             return self.resolveClass(rest, mod)
         elif isinstance(mod, types.ModuleType):
             top_level, rest = parts
@@ -250,6 +263,9 @@ class Namespace(AReference):
         self.ns[sym] = v
 
         return v
+
+    def imprt(self, python_namespace):
+        self.python_ns[python_namespace.__name__] = python_namespace
 
     @classmethod
     def find_or_create(cls, name):

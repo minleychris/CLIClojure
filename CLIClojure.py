@@ -335,6 +335,11 @@ def USE(*args):
     load(currentNS(), name + ".clj")
 
 
+def IMPORT(*args):
+    name = args[0].name
+    currentNS().imprt(__import__(name))
+
+
 def META(obj):
     if isinstance(obj, IMeta):
         meta = obj.meta()
@@ -364,16 +369,18 @@ def eval_s_exp(s_exp, ns):
 
     if is_special(func):
         return func(rest, ns)
-    elif isinstance(func, types.FunctionType):
-        if rest is None:
-            return func()
-        evaled = map(lambda r: l_eval(r, ns), rest)
-        return func(*evaled)
-    else:
+    elif isinstance(func, types.TypeType) and issubclass(func, IFn):  # TODO: Fn or Ifn????
         if rest is None:
             return func().invoke()
         evaled = map(lambda r: l_eval(r, ns), rest)
         return func().invoke(*evaled)
+    elif callable(func):
+        if rest is None or rest.count() == 0:
+            return func()
+        evaled = map(lambda r: l_eval(r, ns), rest)
+        return func(*evaled)
+    else:
+        raise Exception  # TODO: better exception
 
 
 def l_eval(exp, ns):
@@ -682,6 +689,7 @@ def create_base_ns():
     ns.intern(Symbol.intern("meta")).set(META)
     ns.intern(Symbol.intern("with-meta")).set(WITH_META)
     ns.intern(Symbol.intern("use")).set(USE)
+    ns.intern(Symbol.intern("import")).set(IMPORT)
 
     CURRENT_NS = ns
 
