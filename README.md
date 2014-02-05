@@ -8,7 +8,7 @@ aimed for in CLIClojure would be to execute the following:
 
     ; CLIClojure script to change permissions of some files
 
-    (use os)
+    (use 'os)
 
     (def files-dir "/tmp/files")
 
@@ -24,7 +24,7 @@ operating system concepts (in this case ls and chmod).  A more advanced script w
 
     ; CLIClojure script to resize a bunch of jpgs
 
-    (use os)
+    (use 'os)
 
     (def images-dir "/tmp/images")
 
