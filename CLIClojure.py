@@ -710,9 +710,6 @@ def load(ns, script):
 
 
 def main(name, script=None, *args):
-    print(name)
-    print(script)
-    print(args)
 
     ns = create_base_ns()
 
