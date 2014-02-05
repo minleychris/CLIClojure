@@ -329,6 +329,12 @@ def EQUALS(*args):
     return reduce(lambda x, y: x == y, args)
 
 
+# Realy basic use - not fully supporting stuff yet
+def USE(*args):
+    name = args[0].name
+    load(currentNS(), name + ".clj")
+
+
 def META(obj):
     if isinstance(obj, IMeta):
         meta = obj.meta()
@@ -675,6 +681,7 @@ def create_base_ns():
     ns.intern(Symbol.intern("rest")).set(REST)
     ns.intern(Symbol.intern("meta")).set(META)
     ns.intern(Symbol.intern("with-meta")).set(WITH_META)
+    ns.intern(Symbol.intern("use")).set(USE)
 
     CURRENT_NS = ns
 
