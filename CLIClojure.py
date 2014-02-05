@@ -674,7 +674,13 @@ def create_base_ns():
 
     CURRENT_NS = ns
 
-    f = open('core.clj', 'r')
+    load(ns, 'core.clj')
+
+    return ns
+
+
+def load(ns, script):
+    f = open(script, 'r')
     f_string = f.read()
     evaled = parse_eval(f_string, ns)
 
@@ -682,11 +688,21 @@ def create_base_ns():
     for val in evaled:
         if val is not None:
             print val
-    return ns
 
 
-def main():
-    create_base_ns()
+def main(name, script=None, *args):
+    print(name)
+    print(script)
+    print(args)
+
+    ns = create_base_ns()
+
+    if len(args) > 0:
+        ns.intern(Symbol.intern("*command-line-args*")).set(PersistentList.create(args))
+
+    if script is not None:
+        load(ns, script)
+
 
     while True:
         line = raw_input(str(CURRENT_NS.name) + "=> ")
@@ -696,4 +712,4 @@ def main():
                 print val
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(*sys.argv))
