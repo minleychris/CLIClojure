@@ -101,3 +101,10 @@ Then to run it just clone and then from within the directory type:
 
     CLIClojure.py
 
+To build a binary (useful if you want to be able to use a #! to execute your script) you can use pyinstaller:
+
+    pyinstaller CLIClojure.py
+
+This will create a binary at:
+
+    dist/CLIClojure/CLIClojure

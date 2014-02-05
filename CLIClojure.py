@@ -503,10 +503,14 @@ grammar = Grammar(
     single_whitespace_char = " " / "\\n" / "\\t" / "\\r" / ","
 
     # reader macro table
-    reader_macro = reader_comment / reader_quote / reader_metadata
+    reader_macro = reader_comment / reader_quote / reader_metadata / dispatch_macro
     reader_comment = ~";.*$"M
     reader_quote = "'" exp
     reader_metadata = "^" (symbol / string / keyword / map) whitespace exp
+
+    # dispatch macro table - this includes dealing with the hashbang, although that is not from standard Clojure
+    dispatch_macro = dispatch_hashbang
+    dispatch_hashbang = ~"^#!.*$"M
     """)
 
 
