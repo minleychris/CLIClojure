@@ -111,7 +111,7 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(val, None)
 
         val = eval_one("(meta (with-meta [1 2 3] \"x\"))")
-        self.assertEqual(val.__str__(), "\"x\"")
+        self.assertEqual(val.__str__(), "x")
 
 
 class TestDataStructures(unittest.TestCase):
@@ -126,7 +126,7 @@ class TestDataStructures(unittest.TestCase):
 
     def test_string(self):
         val = eval_one("\"string\"")
-        self.assertEqual(val, CLIClojure.String("string"))
+        self.assertEqual(val, "string")
 
     def test_keyword(self):
         val = eval_one(":keyword")
@@ -185,7 +185,7 @@ class TestReaderMacros(unittest.TestCase):
         self.assertEqual(val.__str__(), "{:test true}")
 
         val = eval_one("(meta ^\"test\" [1 2 3])")
-        self.assertEqual(val.__str__(), "{:tag \"test\"}")
+        self.assertEqual(val.get(clojure.lang.Keyword("tag")), "test")
 
 
 class TestClojureDefinedFunctions(unittest.TestCase):

@@ -14,42 +14,13 @@ from parsimonious.grammar import Grammar
 # when they are finished enough.  Ideas in here come from the JVM Clojure classes LispReader, Compiler and RT.
 #
 # TODO:
-#   The String and Boolean objects are not right and I need to get rid of them.
+#   The Boolean objects are not right and I need to get rid of them.
 #   Some of the special forms are not so special and should be got rid of
 #   The functions that are implemented in here should be got rid of
 #   Registering the special forms is not right, also the is_special and isSpecial functions
 #   Need to add the remaining special forms from Compiler.java
 #
 ##
-
-
-class String(object):
-    def __init__(self, val):
-        self._val = val
-
-    def __str__(self):
-        return "\"" + self._val + "\""
-
-    def __lt__(self, other):
-        return isinstance(other, String) and self._val.__lt__(other._val)
-
-    def __le__(self, other):
-        return isinstance(other, String) and self._val.__le__(other._val)
-
-    def __eq__(self, other):
-        return isinstance(other, String) and self._val.__eq__(other._val)
-
-    def __ne__(self, other):
-        return isinstance(other, String) and self._val.__ne__(other._val)
-
-    def __gt__(self, other):
-        return isinstance(other, String) and self._val.__gt__(other._val)
-
-    def __ge__(self, other):
-        return isinstance(other, String) and self._val.__ge__(other._val)
-
-    def __hash__(self):
-        return self._val.__hash__()
 
 
 class Boolean(object):
@@ -94,7 +65,7 @@ def DEF(args, ns):
     # (def x) or (def x initexpr) or (def x "docstring" initexpr)
     docstring = None
 
-    if len(args) == 3 and isinstance(second(args), String):
+    if len(args) == 3 and isinstance(second(args), types.StringTypes):
         docstring = second(args)
         args = PersistentList.create([first(args), third(args)])
 
@@ -377,7 +348,7 @@ def eval_s_exp(s_exp, ns):
 def l_eval(exp, ns):
     if isinstance(exp, int):
         return exp
-    if isinstance(exp, String):
+    if isinstance(exp, types.StringTypes):
         return exp
     if isinstance(exp, Boolean):
         return exp
@@ -556,7 +527,7 @@ def process_tree(node):
     elif node["type"] == "keyword":
         return Keyword(node["text"])
     elif node["type"] == "string":
-        return String(node["text"][1:-1])
+        return node["text"][1:-1]
     elif node["type"] == "boolean":
         return Boolean(node["text"])
     elif node["type"] == "nil":
@@ -580,7 +551,7 @@ def process_reader_macro(node):
     elif node["type"] == "reader_metadata":
         meta = process_tree(node["children"][0])
 
-        if isinstance(meta, Symbol) or isinstance(meta, String):
+        if isinstance(meta, Symbol) or isinstance(meta, types.StringTypes):
             val = meta
             meta = Map()
             meta.assoc(Keyword(":tag"), val)
@@ -720,6 +691,8 @@ def main(name, script=None, *args):
 def print_output(val):
     if val is None:
         p = "nil"
+    elif isinstance(val, types.StringTypes):
+        p = "\"" + val + "\""
     else:
         p = str(val)
     print p
