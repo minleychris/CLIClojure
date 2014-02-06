@@ -134,10 +134,10 @@ class TestDataStructures(unittest.TestCase):
 
     def test_boolean(self):
         val = eval_one("true")
-        self.assertEqual(val, CLIClojure.Boolean("true"))
+        self.assertEqual(val, True)
 
         val = eval_one("false")
-        self.assertEqual(val, CLIClojure.Boolean("false"))
+        self.assertEqual(val, False)
 
     def test_nil(self):
         val = eval_one("nil")
@@ -179,10 +179,10 @@ class TestReaderMacros(unittest.TestCase):
 
     def test_metadata(self):
         val = eval_one("(meta ^{:test true} [1 2 3])")
-        self.assertEqual(val.__str__(), "{:test true}")
+        self.assertEqual(val.get(clojure.lang.Keyword("test")), True)
 
         val = eval_one("(meta ^:test [1 2 3])")
-        self.assertEqual(val.__str__(), "{:test true}")
+        self.assertEqual(val.get(clojure.lang.Keyword("test")), True)
 
         val = eval_one("(meta ^\"test\" [1 2 3])")
         self.assertEqual(val.get(clojure.lang.Keyword("tag")), "test")

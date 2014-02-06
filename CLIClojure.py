@@ -14,29 +14,12 @@ from parsimonious.grammar import Grammar
 # when they are finished enough.  Ideas in here come from the JVM Clojure classes LispReader, Compiler and RT.
 #
 # TODO:
-#   The Boolean objects are not right and I need to get rid of them.
 #   Some of the special forms are not so special and should be got rid of
 #   The functions that are implemented in here should be got rid of
 #   Registering the special forms is not right, also the is_special and isSpecial functions
 #   Need to add the remaining special forms from Compiler.java
 #
 ##
-
-
-class Boolean(object):
-    def __init__(self, val):
-        self._val = val == "true"
-
-    def __str__(self):
-        if self._val:
-            return "true"
-        return "false"
-
-    def __eq__(self, other):
-        return isinstance(other, Boolean) and self._val == other._val
-
-    def __hash__(self):
-        return self._val.__hash__()
 
 
 Ignore = object()
@@ -350,7 +333,7 @@ def l_eval(exp, ns):
         return exp
     if isinstance(exp, types.StringTypes):
         return exp
-    if isinstance(exp, Boolean):
+    if isinstance(exp, types.BooleanType):
         return exp
     if exp is None:
         return exp
@@ -529,7 +512,7 @@ def process_tree(node):
     elif node["type"] == "string":
         return node["text"][1:-1]
     elif node["type"] == "boolean":
-        return Boolean(node["text"])
+        return node["text"] == "true"
     elif node["type"] == "nil":
         return None
     elif node["type"] == "reader_macro":
@@ -558,7 +541,7 @@ def process_reader_macro(node):
         elif isinstance(meta, Keyword):
             val = meta
             meta = Map()
-            meta.assoc(val, Boolean("true"))
+            meta.assoc(val, True)
         elif not isinstance(meta, Map):
             print(type(meta))
             # TODO: better throw new IllegalArgumentException("Metadata must be Symbol,Keyword,String or Map");
