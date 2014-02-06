@@ -622,6 +622,7 @@ def create_base_ns():
              Symbol.intern("def"): DEF,
              Symbol.intern("fn*"): FN,
              Symbol.intern("let*"): LET,
+             Symbol.intern("loop*"): LET,
              Symbol.intern("do"): DO,
              Symbol.intern("ns"): NS,
              Symbol.intern("comment"): COMMENT,
