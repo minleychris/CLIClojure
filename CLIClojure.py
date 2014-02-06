@@ -14,7 +14,7 @@ from parsimonious.grammar import Grammar
 # when they are finished enough.  Ideas in here come from the JVM Clojure classes LispReader, Compiler and RT.
 #
 # TODO:
-#   The String, Boolean and Nil objects are not right and I need to get rid of them.
+#   The String and Boolean objects are not right and I need to get rid of them.
 #   Some of the special forms are not so special and should be got rid of
 #   The functions that are implemented in here should be got rid of
 #   Registering the special forms is not right, also the is_special and isSpecial functions
@@ -68,16 +68,7 @@ class Boolean(object):
         return self._val.__hash__()
 
 
-class Nil(object):
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(Nil, cls).__new__(cls, *args)
-        return cls._instance
-
-    def __str__(self):
-        return "nil"
+Ignore = object()
 
 
 CURRENT_NS = None
@@ -277,7 +268,7 @@ def LET(args, ns):
 
 
 def DO(args, ns):
-    last = Nil()
+    last = None
     for form in args:
         last = l_eval(form, ns)
 
@@ -293,7 +284,7 @@ def NS(args, __env):
 
 
 def COMMENT(args, __env):
-    return Nil()
+    return None
 
 
 def DOT(args, __env):
@@ -344,9 +335,9 @@ def META(obj):
     if isinstance(obj, IMeta):
         meta = obj.meta()
         if meta is None:
-            return Nil()
+            return None
         return meta
-    return Nil()
+    return None
 
 
 def WITH_META(obj, m):
@@ -390,7 +381,7 @@ def l_eval(exp, ns):
         return exp
     if isinstance(exp, Boolean):
         return exp
-    if isinstance(exp, Nil):
+    if exp is None:
         return exp
     if isinstance(exp, Symbol):
         if not isSpecial(exp):
@@ -569,14 +560,14 @@ def process_tree(node):
     elif node["type"] == "boolean":
         return Boolean(node["text"])
     elif node["type"] == "nil":
-        return Nil()
+        return None
     elif node["type"] == "reader_macro":
         return process_reader_macro(node["children"][0])
 
 
 def process_reader_macro(node):
     if node["type"] == "reader_comment":
-        return None
+        return Ignore
     elif node["type"] == "reader_quote":
         quote = {'type': "symbol",
                  'children': [],
@@ -647,7 +638,7 @@ def tree_to_list(tree):
 
     for node in reversed(tree["children"]):
         p_node = process_tree(node)
-        if p_node is not None:
+        if p_node is not Ignore:
             lst = lst.cons(p_node)
 
     if tree["type"] == "exp":
@@ -705,8 +696,7 @@ def load(ns, script):
 
     #TODO: debug
     for val in evaled:
-        if val is not None:
-            print val
+        print_output(val)
 
 
 def main(name, script=None, *args):
@@ -724,8 +714,16 @@ def main(name, script=None, *args):
         line = raw_input(str(CURRENT_NS.name) + "=> ")
         evaled = parse_eval(line, CURRENT_NS)
         for val in evaled:
-            if val is not None:
-                print val
+            print_output(val)
+
+
+def print_output(val):
+    if val is None:
+        p = "nil"
+    else:
+        p = str(val)
+    print p
+
 
 if __name__ == "__main__":
     sys.exit(main(*sys.argv))

@@ -75,7 +75,7 @@ class TestSpecialForms(unittest.TestCase):
     def test_comment(self):
         ns = CLIClojure.create_base_ns()
         val = eval_one("(comment test)", ns)
-        self.assertEqual(val.__str__(), "nil")
+        self.assertEqual(val, None)
 
 
 class TestFunctions(unittest.TestCase):
@@ -108,7 +108,7 @@ class TestFunctions(unittest.TestCase):
 
     def test_meta(self):
         val = eval_one("(meta [1 2 3])")
-        self.assertEqual(val.__str__(), "nil")
+        self.assertEqual(val, None)
 
         val = eval_one("(meta (with-meta [1 2 3] \"x\"))")
         self.assertEqual(val.__str__(), "\"x\"")
@@ -141,7 +141,7 @@ class TestDataStructures(unittest.TestCase):
 
     def test_nil(self):
         val = eval_one("nil")
-        self.assertEqual(val, CLIClojure.Nil())
+        self.assertEqual(val, None)
 
     def test_map(self):
         val = eval_one("{:a 1}")
