@@ -305,7 +305,7 @@ def is_special(func):
 def isSpecial(op):
     if not isinstance(op, Symbol):
         return False
-    return op.name in ["if", "quote", "def", "fn*", "let*", "do", "ns", "comment", "."]
+    return op.name in ["if", "quote", "def", "fn*", "let*", "loop*", "do", "ns", "comment", "."]
 
 
 def eval_s_exp(s_exp, ns):

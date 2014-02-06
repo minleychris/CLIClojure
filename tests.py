@@ -55,6 +55,17 @@ class TestSpecialForms(unittest.TestCase):
         val = eval_one("(let* [a 1 b (+ a 1)] (+ b 1))")
         self.assertEqual(val.__str__(), "3")
 
+    def test_loop(self):
+        val = eval_one("(loop* [a 1] (+ a 1))")
+        self.assertEqual(val, 2)
+        val = eval_one("(loop* [a 1 b (+ a 1)] (+ b 1))")
+        self.assertEqual(val, 3)
+
+        val = eval_one("(loop [a 1] (+ a 1))")
+        self.assertEqual(val, 2)
+        val = eval_one("(loop [a 1 b (+ a 1)] (+ b 1))")
+        self.assertEqual(val, 3)
+
     def test_do(self):
         ns = CLIClojure.create_base_ns()
         val = eval_one("(do (def a 44) 4)", ns)
